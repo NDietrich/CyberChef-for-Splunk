@@ -1,2 +1,2 @@
-# CyberChef-for-Splunk
+# CyberChef Custom Search Command for Splunk
 Splunk App that provides CyberChef functionality as a Custom Search Command
