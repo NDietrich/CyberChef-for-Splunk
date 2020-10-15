@@ -1,0 +1,18 @@
+# Example Recipes you can call from the 'cyberchef' custom search command
+# use the 'recipe' option in the cyberchef custom search command to reference these recipes.
+
+
+# EXAMPLE 1
+
+# convert text to xml-safe b64 then to moorse code.
+# use as follows:  
+#  ... | cyberchef infield='blah' recipe='example_xml_moorse' | ...
+example_xml_moorse	: [{"op":"To Base64","args":["A-Za-z0-9_."]},{"op":"To Morse Code","args":["-/.","Space","Line feed"]}]
+
+
+# EXAMPLE 2
+
+# convert to moorse code.
+# use as follows:  
+#  ... | cyberchef infield='blah' recipe='example_moorse' | ...
+example_moorse	: [{"op":"To Morse Code","args":["-/.","Space","Line feed"]}]

@@ -1,0 +1,8 @@
+<nav search_view="search">
+  <view name="search" default='true' />
+  <view name="datasets" />
+  <view name="reports" />
+  <view name="alerts" />
+  <view name="dashboards" />
+  <a href="/static/app/cyberchef/CyberChef.html"  target="_blank">CyberChef</a>
+</nav>
