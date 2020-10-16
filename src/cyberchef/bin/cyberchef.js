@@ -1,7 +1,26 @@
 
+// v3: working, but no CSV functionality
+// v4: csv working, field selection working
+// v5: node working (with hard-coded command), comments added + cleanup
+// v6: dynamic NODE workgin, refactored parameter parsing as well.
+// v7: added error option and bake options
+// v8: working on better loading of bake file, no luck.
+// v9: nearly parser working (except for "" with spaces)
+// v10: parser working, added compact json loaded from file, b64 commands
+//		using grammar_v3.ne
+//
+//	Todo: Testing 
+
+// //https://www.npmjs.com/package/csv-string
+// npm install -s csv-string
+
+
 //-------------------------------------
 // 			DEBUG
 //-------------------------------------
+
+
+
 var fs = require('fs'); 
 const logit = function (msg) { 	fs.appendFileSync('jsStdout.txt', msg + "\n", function (err) { if (err) throw err; }); }
 // END DEBUG
@@ -9,9 +28,7 @@ const logit = function (msg) { 	fs.appendFileSync('jsStdout.txt', msg + "\n", fu
 //-----------------------------------------------------------------------------
 //						Globals
 //-----------------------------------------------------------------------------
-
-
-
+//var recipes = {}	// all the recipes loaded from file ../recipes
 
 //-----------------------------------------------------------------------------
 //						CLASS DEFINITIONS
@@ -40,7 +57,7 @@ class splunkMessage {
 	* @param {int}		payloadSize		Number of Chars of payload, determined from the header
 	* @param {string}	inputSearchField	Field to read data from for processing by cyberchef
 	* @param {string} 	outputSearchField	Field to write data motdified by cyberchef
-	* @param {string} 	command	the cyberchef command to run (single command, no options)
+	* @param {string} 	operation the cyberchef operation to run (single operation, no options)
 	* @param {string} 	recipe the alias of the json-formatted recipe to load from file
 	* @param {string} 	recipeJson Json-formatted recipe for chef to run
 	* @param {string} 	b64recipe b64-encoded Json-formatted recipe for chef to run
@@ -56,7 +73,7 @@ class splunkMessage {
 
 		this.inputSearchField = ''
 		this.outputSearchField = ''
-		this.command = ''
+		this.operation = ''
 		this.recipeJson = ''
 		this.recipe =''
 		this.b64recipe =''
@@ -138,8 +155,8 @@ class splunkMessage {
 							this.outputSearchField = value; break
 						case 'recipe':
 							this.recipe  = value.toLowerCase(); break
-						case 'command':
-							this.command = value; break
+						case 'operation':
+							this.operation = value; break
 						case 'b64recipe':
 							this.b64recipe = value; break
 						default:
@@ -229,7 +246,7 @@ class splunkMessage {
 
 		this.inputSearchField = ''
 		this.outputSearchField = ''
-		this.command = ''
+		this.operation = ''
 		this.recipe = ''
 		this.recipeJson = ''
 		this.b64recipe =''
@@ -267,7 +284,7 @@ class splunkMessage {
 		var x = new splunkMessage()
 		x.inputSearchField =  this.inputSearchField 
 		x.outputSearchField = this.outputSearchField
-		x.command = this.command 
+		x.operation = this.operation 
 		x.recipe = this.recipe 
 		x.recipeJson = this.recipeJson
 		x.rawPayload = this.rawPayload
@@ -285,7 +302,7 @@ class splunkMessage {
 		logit("		message type is: " + this.metadataCommand)
 		//logit("		- InField is: " + this.inputSearchField)
 		//logit("		- Outfield is: " + this.outputSearchField)
-		//logit("		- command is: " + this.command)
+		//logit("		- operation is: " + this.operation)
 		logit("		- recipe is: " + this.recipe)
 		logit("		- recipeJson is: " + this.recipeJson)
 		//logit("		rawPayload is : \n" + this.rawPayload +"\n<<END>>")
@@ -435,10 +452,10 @@ const processPayload = function(msg){
 	var outIndex = events[0].indexOf(msg.outputSearchField)
 	if (inIndex == -1 || outIndex == -1) {errorOut("Fatal Error in function processPayload: bad index of input/output field.")}
 
-	// Determine if we're running a simple command, a complex recipe loaded from file, or a b64-encoded recipe
+	// Determine if we're running a simple operation, a complex recipe loaded from file, or a b64-encoded recipe
 	var cmdToRun = ''
-	if(msg.command.length > 0){
-		cmdToRun = msg.command
+	if(msg.operation.length > 0){
+		cmdToRun = msg.operation
 	} else if (msg.recipe.length > 0) {
 		try {
 			cmdToRun = JSON.parse( msg.recipeJson)
@@ -453,7 +470,7 @@ const processPayload = function(msg){
 			errorOut('Can not process b64-encoded string. Error: ' + err.message)
 		}
 
-		//logit("command is now: " + cmdToRun)
+		//logit("operation is now: " + cmdToRun)
 		try {
 			cmdToRun = JSON.parse( cmdToRun)
 		} catch (err){
@@ -578,7 +595,7 @@ process.stdin.on('readable', () => {
 			// copy the search info from our getInfoMessage to the data message
 			workingMessage.inputSearchField 	= getinfoMessage.inputSearchField
 			workingMessage.outputSearchField 	= getinfoMessage.outputSearchField
-			workingMessage.command 				= getinfoMessage.command
+			workingMessage.operation 			= getinfoMessage.operation
 			workingMessage.recipe 				= getinfoMessage.recipe
 			workingMessage.b64recipe 			= getinfoMessage.b64recipe
 
