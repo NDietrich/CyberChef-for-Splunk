@@ -16,7 +16,7 @@ Y2FuZHliYXJz                | candybars
 Y29tcHV0ZXIgc2F5cyBubw==    | computer says no
 ```
 
-This App is released under the GPL v3 license. Please see the [LICENSE](./LICENSE-GPL_v3) file.  CyberChef is released under the [Apache 2.0 License](./LICENSE-Apache_v2.0) and is covered by [Crown Copyright](https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/).  This App has no affiliation with CyberChef or GCHQ, it merely leverages their open-source software. 
+This App is released under the GPL v3 license. Please see the [LICENSE](./LICENSE-GPL_v3) file.  CyberChef is released under the [Apache 2.0 License](./LICENSE-Apache_v2.0) and is covered by [Crown Copyright](https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/).  This App has no affiliation with CyberChef or GCHQ, it merely implements their open-source software. 
 
 # Installing This App
 You should install this App on all your Splunk Indexers and Search Heads (there is no benefit or harm to installing it on any forwarders).  A reboot of Splunk is required after installation. No configuration is required to use this App after installation.
