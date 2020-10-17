@@ -70,6 +70,7 @@ class splunkMessage {
 		this.metadataCommand = ''
 		this.metadataSize = 0
 		this.payloadSize = 0
+		this.jsonRecipe = ''
 
 		this.inputSearchField = ''
 		this.outputSearchField = ''
@@ -77,6 +78,7 @@ class splunkMessage {
 		this.recipeJson = ''
 		this.recipe =''
 		this.b64recipe =''
+		this.jsonRecipe = ''
 
 		this.rawPayload = ''
 	}
@@ -115,8 +117,6 @@ class splunkMessage {
 			// search string needs to be a string, not a half-assed array of kv pairs
 			searchOptions = searchOptions.join(' ')
 
-			//logit("Search Options are: " + searchOptions)
-
 			// load required parser
 			try{
 				var nearley = require("nearley");
@@ -147,7 +147,6 @@ class splunkMessage {
 			for(var i = 0; i < kvPairs.length; i++){
 
 				for (const [key, value] of Object.entries(kvPairs[i])) {
-				  	//logit("K/V: " + key + "/" + value)
 					switch(key){
 						case 'infield':
 							this.inputSearchField = value; break
@@ -159,6 +158,8 @@ class splunkMessage {
 							this.operation = value; break
 						case 'b64recipe':
 							this.b64recipe = value; break
+						case 'jsonRecipe':
+							this.jsonRecipe = value; break	
 						default:
 							// todo: unknown option here
 							break			
@@ -251,6 +252,7 @@ class splunkMessage {
 		this.recipeJson = ''
 		this.b64recipe =''
 		this.rawPayload = ''
+		this.jsonRecipe = ''
 	}
 
 	/**
@@ -289,6 +291,7 @@ class splunkMessage {
 		x.recipeJson = this.recipeJson
 		x.rawPayload = this.rawPayload
 		x.b64recipe = this.b64recipe
+		x.jsonRecipe = this.jsonRecipe
 		return x
 	}
 
@@ -423,15 +426,14 @@ const returnProcessedData = function(data){
 */
 const processPayload = function(msg){
 	// where the magic hapens. modify the payload here before returning it.
-	//msg.print()
 	// load cyberchef and csv-string modules. delayed so we don't load it for each GETINFO command which doesn't use it
-	//logit(" ENTERING FUNCTION processPayload")
+
 	try {
 		var chef = require("cyberchef")
 	} catch (err) {
 		errorOut("Fatal Error in function processPayload:  Can't load module Cyberchef " + err.message + ", " + err.name)
 	}
-	logit("WORKING: " + module.paths)
+
 	try {
 		var CSV = require('csv-string')
 	} catch (err) {
@@ -462,24 +464,28 @@ const processPayload = function(msg){
 		} catch (err){
 			errorOut("Fatal Error in function processPayload: error during desearalize json of recipe named "+ msg.recipe + ". Error:" + err.name)
 		}
-	} else {
-		//logit("parsing b64 string: " + msg.FromBase64)
+	} else if (msg.b64recipe.length > 0) {
 		try{
 			cmdToRun = chef.bake(msg.b64recipe, 'FromBase64' )
 		}catch (err){
 			errorOut('Can not process b64-encoded string. Error: ' + err.message)
 		}
-
-		//logit("operation is now: " + cmdToRun)
 		try {
 			cmdToRun = JSON.parse( cmdToRun)
 		} catch (err){
 			errorOut("Fatal Error in function processPayload: error during desearalize json from b64.  Error: " + err.name)
 		}
+
+	} else {
+		try {
+			cmdToRun = JSON.parse( msg.jsonRecipe)
+		} catch (err){
+			errorOut("Fatal Error in function processPayload: error during desearalize json of jsonRecipe. Error:" + err.name)
+		}
+
 	}
 
 	// Iterate over each row of data (except header) and process with cyberchef
-	//logit("events length is: " + events.length)
 	for(var i = 1; i < events.length; i++){
 
 		try {
@@ -501,8 +507,6 @@ const processPayload = function(msg){
 const loadRecipesFromFile = function( recipeAliasToLoad ) {
 
 	const recipeFolders = ['..//local//recipes//', '..//default//recipes//' ]
-
-	//logit("\n\nLooking for recipe with alias: " + recipeAliasToLoad)
 
 	try {
 		var fs = require('fs')
@@ -528,11 +532,10 @@ const loadRecipesFromFile = function( recipeAliasToLoad ) {
 			try {
 				var content = fs.readFileSync( file, 'UTF-8')
 			} catch(err) {
-				//logit("Fatal Error in function loadRecipesFromFile: can't read file from recipe folder: "+ file + ": " + err.message)
+				// do nothing
 			}
-			//logit("checking file: " + file)
+			
 			if(content.length != 0){
-				//logit("CONTENT: "+content)
 				line = content.split(/\r?\n/);
 
 				for(var i = 0; i< line.length; i++){
@@ -541,9 +544,7 @@ const loadRecipesFromFile = function( recipeAliasToLoad ) {
 						// split the line at the first colon found, left side is the nickname, right side is the json recipe
 						var recipeName = line[i].substr(0,line[i].indexOf(':')).trim()
 						var recipeCode = line[i].substr(line[i].indexOf(':')+1).trim()
-						//logit("FOUND: name/code: " +recipeName +"/"+recipeCode)
 						if (recipeName == recipeAliasToLoad) {
-							//logit("RETURING JSON: "+recipeCode)
 							return recipeCode
 						}
 						
@@ -598,7 +599,7 @@ process.stdin.on('readable', () => {
 			workingMessage.operation 			= getinfoMessage.operation
 			workingMessage.recipe 				= getinfoMessage.recipe
 			workingMessage.b64recipe 			= getinfoMessage.b64recipe
-
+			workingMessage.jsonRecipe 			= getinfoMessage.jsonRecipe
 			// load recipes:
 			if (workingMessage.recipe.length != 0) {
 				//logit("loading Reipes from file...." + getinfoMessage.recipe)

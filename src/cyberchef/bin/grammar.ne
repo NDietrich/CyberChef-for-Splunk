@@ -37,6 +37,7 @@ OUTOPTION 		-> 	"outfield"i _ "=" _ FIELDNAME					{% function(d) {return {outfie
 OPTIONALCMDS	->	RECIPEOPTION 	{% id %}
 				|	OPPOPTION		{% id %}
 				|	B64RECIPE		{% id %}
+				|	JSONRECIPE		{% id %}
 
 RECIPEOPTION	->	"recipe"i _ "=" _ [\w]:+					{% function(d) {return {recipe:d[4].join('')}}  %}
 				|	"recipe"i _ "=" _ "\"" QUOTEDOPT "\"" 		{% function(d) {return {recipe:d[5]}}  %}
@@ -49,6 +50,8 @@ OPPOPTION		-> 	"operation"i _ "=" _ [\w]:+					{% function(d) {return {operation
 B64RECIPE		-> 	"b64recipe"i _ "=" _ [a-zA-Z0-9=/+]:+					{% function(d) {return {b64recipe:d[4].join('')}}  %}
 				|	"b64recipe"i _ "=" _ "\"" [a-zA-Z0-9=/+]:+ "\"" 		{% function(d) {return {b64recipe:d[5].join('')}}  %}
 				|	"b64recipe"i _ "=" _ "'" [a-zA-Z0-9=/+]:+ "'" 			{% function(d) {return {b64recipe:d[5].join('')}}  %}
+
+JSONRECIPE		-> "jsonRecipe"i _ "=" _ "\"" JSONCHARS "\"" 		{% function(d) {return {jsonRecipe:d[5]}}  %}
 				
 # for standard FieldNames. Start with a letter, then any letter, number, or underscore
 FIELDNAME		-> [a-zA-Z] FIELDNAMECHARS:*		{% function(d) {return  d[0].concat(d[1].join('')) }  %}
@@ -69,3 +72,14 @@ QUOTEDOPTCHAR 	-> 	[\w] 				{% id %}
 				| 	"#" 			 	{% id %}     
 				| 	"\"" 				{% id %}
 				| 	" "  				{% id %}
+				
+# CHARSET for the options, lots of possibilities here
+JSONCHARS		-> 	JSONCHAR:+		{% function(d) {return  d[0].join('') }  %}
+JSONCHAR	 	-> 	[ -~]				{% id %}  # all ASCII chars from space to tilde
+#				|	[\w] 				{% id %}
+#				| 	[(){}\\,.\[\]:-] 	{% id %}
+#				|	[+/=']				{% id %}
+#				| 	"@" 			 	{% id %} 
+#				| 	"#" 			 	{% id %}     
+#				| 	"\"" 				{% id %}
+#				| 	" "  				{% id %}
