@@ -6,8 +6,6 @@
 
 # to generate js: node.exe nearleyc.js grammar.ne -o grammar.js
 
-# v4: replace 'command' with 'operation'
-
 @builtin "whitespace.ne" # definitions for whitespace
 
 # remove any surounding whitespace from the ends of the string
@@ -57,29 +55,14 @@ JSONRECIPE		-> "jsonRecipe"i _ "=" _ "\"" JSONCHARS "\"" 		{% function(d) {retur
 FIELDNAME		-> [a-zA-Z] FIELDNAMECHARS:*		{% function(d) {return  d[0].concat(d[1].join('')) }  %}
 FIELDNAMECHARS	-> [\w] 							{% id %}
 
-# Quoted FieldNames, can include spaces, periods, and colons. can start with anything
-# https://community.splunk.com/t5/Archive/Which-characters-does-Splunk-allow-in-field-names/m-p/427039
+# Quoted FieldNames, can be prety much anything
 QUOTEDFIELDNAME			-> 	QUOTEDFIELDNAMECHAR:+		{% function(d) {return  d[0].join('') }  %}
-QUOTEDFIELDNAMECHAR		-> 	[\w]		{% id %}
-						|	" " 		{% id %}
-						| 	[.:] 		{% id %}
+QUOTEDFIELDNAMECHAR		-> 	[ -~]				{% id %}  # all ASCII chars from space to tilde
 
-# CHARSET for the options, lots of possibilities here
+# CHARSET for the options
 QUOTEDOPT		-> 	QUOTEDOPTCHAR:+		{% function(d) {return  d[0].join('') }  %}
-QUOTEDOPTCHAR 	-> 	[\w] 				{% id %}
-				| 	[(){}\\,.\[\]:-] 	{% id %}
-				| 	"@" 			 	{% id %} 
-				| 	"#" 			 	{% id %}     
-				| 	"\"" 				{% id %}
-				| 	" "  				{% id %}
+QUOTEDOPTCHAR 	-> 	[ -~]				{% id %}  # all ASCII chars from space to tilde
 				
-# CHARSET for the options, lots of possibilities here
+# CHARSET for the json
 JSONCHARS		-> 	JSONCHAR:+		{% function(d) {return  d[0].join('') }  %}
 JSONCHAR	 	-> 	[ -~]				{% id %}  # all ASCII chars from space to tilde
-#				|	[\w] 				{% id %}
-#				| 	[(){}\\,.\[\]:-] 	{% id %}
-#				|	[+/=']				{% id %}
-#				| 	"@" 			 	{% id %} 
-#				| 	"#" 			 	{% id %}     
-#				| 	"\"" 				{% id %}
-#				| 	" "  				{% id %}
