@@ -1,3 +1,27 @@
+
+
+/*-------------------------------------------------------------------------------------------
+// TODO:
+- 	fix grammer to handle quotes properly (escaped)
+-	troubleshoot windows newlines in data
+-	troubleshoot csv file input
+-	test on linux
+-	update commands.conf for new option (jsonRecipe) and examples
+-	get logo
+
+
+// TODO v2
+-	new script to list all recipes 
+
+// DONE
+- 	fix grammer to incude debug=full/info
+-	modify script to handle debug option correclty
+- 	ensure log file is written before error out
+-	log output data if debug=full
+
+-------------------------------------------------------------------------------------------*/
+
+//	EXAMPLE SEARCHES
 // index=wineventlog sourcetype="WinEventLog:Security" 
 // | head 10 
 // | cyberchef infield=RecordNumber outfield=xxx jsonRecipe="[{"op":"To Base64","args":["A-Za-z0-9+/="]}]" 
@@ -13,6 +37,7 @@
 // | cyberchef infield=Message outfield=xxx jsonRecipe="[{"op":"To Base64","args":["A-Za-z0-9+/="]}]" 
 // | table Message xxx
 
+//-------------------------------------------------------------------------------------------
 // Current Bugs:
 //	1. if your source data has newlines, then this won't work.
 //	2. FieldNames: don't have to escape fieldnames like the rest of splunk, ascii only
@@ -22,8 +47,32 @@
 // 			DEBUG
 //-------------------------------------
 
-var fs = require('fs'); 
-const logit = function (msg) { 	fs.appendFileSync('jsStdout.txt',  process.pid +":  " + msg + "\n", function (err) { if (err) throw err; }); }
+const fs = require('fs'); 
+const logit = function (msg) { 	
+	//fs.appendFileSync('jsStdout.txt', process.pid +":  " + msg + "\n", function (err) { if (err) throw err; }); 
+
+	if (debugEnabled == 'none') {return}
+
+	// if debugEnbaled hasn't been set yet, just archive the log data to the 'debugRecords' variable to write later (if wanted)
+	if (debugEnabled == '') {
+		debugRecords += "PID:" + process.pid + "\t" + msg + "\n"
+
+		//fs.appendFileSync('jsStdout.txt', "Archiving DATA:"+msg+"\n", function (err) { })
+
+	} else {
+		var logFileName = dispatch_dir + '\\cyberchef.log'
+		var logFileName = 'jsStdout.txt'	// TODO remove this line (with above)
+		// check if we have anything in our debugRecords var to log first
+		if (debugRecords.length >= 0) {
+			fs.appendFileSync(logFileName,  debugRecords, function (err) { if (err) errorOut("Error writing debug log file " + logFileName + '; ' + err.message) })
+			debugRecords = ''
+		}
+		// and log the data
+		fs.appendFileSync(logFileName,  "PID:" + process.pid + "\t" + msg + "\n", function (err) { if (err) errorOut("Error writing debug log file " + logFileName + '; ' + err.message) }) 
+	}
+
+
+}
 // END DEBUG
 
 //-----------------------------------------------------------------------------
@@ -33,6 +82,13 @@ const logit = function (msg) { 	fs.appendFileSync('jsStdout.txt',  process.pid +
 
 const maxPayloadSize = 0		// do not exceed in reply or Splunk will error. Must be =< maxchunksize in commands.conf
 								// NOTE: NOT WORKING. Keep at 0.
+
+var dispatch_dir = ''		// the directory splunk uses for logging for this search
+							// passed in getinfo, can be blank, end in tmp (ex .../283e00c9b0176a64_tmp), or a the full directory
+							// useful for logging
+
+var debugEnabled = ''	// if we receive a debug option (full or info) then log it 
+var debugRecords = ''	// store debug info until we know if we write it or not
 
 //-----------------------------------------------------------------------------
 //						CLASS DEFINITIONS
@@ -96,19 +152,31 @@ class splunkMessage {
 	* @this: splunkMessage instance
 	*/
 	parseMetadata (){
+		logit ("Parsing metadata from splunkMessage header json.")
 		// Throw fatal error if actual metadata doesn't match the size in the header
 		if(this.rawMetadata.length !=  this.metadataSize) { 
 			errorOut("Fatal error in function parseMetadata: Attepmpt to parse incomplete message from Splunk.")
 		}
 		
-		// parse metadata string JSON (this gives us the entire header, lots of useless fields)
+		// parse metadata string JSON for 'action' field to determine if this is a GETINFO or EXECUTE message
 		try {
 			this.metadataCommand = (JSON.parse(this.rawMetadata)).action
 		} catch (err) {
 			errorOut("Fatal error in function parseMetadata: Error parsing metadata JSON for action field:" + err.message)
 		}
+
+		logit ("\t(from metadata json header) command is: " + this.metadataCommand)
 		
 	    if (this.metadataCommand == 'getinfo') {
+	    	// get our dispatch_dir from the getinfo (save to global var)
+	    	try {
+				dispatch_dir = (JSON.parse(this.rawMetadata)).searchinfo.dispatch_dir
+			} catch (err) {
+				errorOut("Fatal error in function parseMetadata: Error parsing metadata JSON for dispatch_dir field:" + err.message)
+			}
+			
+			logit ("\t(from metadata json header) dispatch_dir is: "  + dispatch_dir)
+
 	    	// get searchOptions and field names from metadta JSON
 			try {
 				var searchOptions = (JSON.parse(this.rawMetadata)).searchinfo.raw_args
@@ -116,9 +184,10 @@ class splunkMessage {
 				errorOut("Fatal error in function parseMetadata: Error parsing metadata JSON for search options field:" + err.message)
 			}
 
-
 			// search string needs to be a string, not a half-assed array of kv pairs
 			searchOptions = searchOptions.join(' ')
+
+			logit ("\t(from metadata json header) search string is: "  + searchOptions)
 
 			// load required parser
 			try{
@@ -140,16 +209,21 @@ class splunkMessage {
 			try {
 				parser.feed(searchOptions);
 			} catch (err){
-				errorOut("Error trying to parse input options: " +  err.message.split('\n')[0] )
+				logit ("Fatal Error trying to parse input options with nearly parser. The parser output is: \n" + err.message.split("\n",5 ).join("\n") + "\n" )
+				errorOut("Error trying to parse input options. Please see cyberchef.log in this search's dispatch_dir for details. Error: " +  err.message.split("\n",1) )
 			}
 			
 			var kvPairs = parser.results[0]
 
-			// check which fields we got
-			// we don't have to check oru input, as the parser nicely does that for us.
+			// check which fields we received
+			// we don't have to validate input, as the parser nicely does that for us.
+			logit ("Evaluating KV Pairs from parser:")
+			debugEnabled = 'none'
+
 			for(var i = 0; i < kvPairs.length; i++){
 
 				for (const [key, value] of Object.entries(kvPairs[i])) {
+					logit ("\tKey: " + key + " ; Value: " + value)
 					switch(key){
 						case 'infield':
 							this.inputSearchField = value; break
@@ -163,6 +237,11 @@ class splunkMessage {
 							this.b64recipe = value; break
 						case 'jsonRecipe':
 							this.jsonRecipe = value; break	
+						case 'debug':
+							debugEnabled = value; 
+							// todo: check that we have a valid dispatch_dir here (form 1604422794.566)
+							// todo: dump past debug info
+							break
 						default:
 							// todo: unknown option here
 							break			
@@ -179,7 +258,7 @@ class splunkMessage {
 	    } else if (this.metadataCommand == 'execute') {
 			// we don't acutally execute anything yet, we need to collect all the payload first.
 		} else {
-			errorOut("Fatal Error: unknown in metadata json: ", this.metadataCommand)
+			errorOut("Fatal Error: unknown command received via SplunkMessage in metadata json: ", this.metadataCommand)
 		}
 	}
 
@@ -190,9 +269,12 @@ class splunkMessage {
 	* @param {string}	data	the string containing data to add
 	*/
 	addData(data){
+		logit ("in function addData")
+		logit ("\tActual data size to process is: " + data.length)
 		// this function assumes that all data recieved is at least a full line (no messages split mid-line)
 		// does the current message have a complete header?
 		if(! this.completeHeader){
+			logit ("\tAdding data to incomplete or empty header.")
 			this.rawHeader = data.split(/\r\n|\n|\r/,1)[0]
 			this.completeHeader = true
 
@@ -203,12 +285,17 @@ class splunkMessage {
 
 			// remove the header from the data and continue
 			data = data.slice(this.rawHeader.length + 1)
+
+			logit("\tValues recieved in header are:\n\t\t\t\t- metadataSize: " + this.metadataSize + "\n\t\t\t\t- payloadSize: " + this.payloadSize )
 		} 
 
-		if(data.length == 0) { return ''}
+		if(data.length == 0) {logit("\tData only contained the header (no metadata or payload), returning."); return ''}
+
+		logit ("\tRemaining data size after parsing header is: " + data.length)
 
 		// does the current message have metadata?
 		if(this.rawMetadata.length == 0){
+			logit ("\tAdding data to incomplete or empty metadata.")
 			// the data should be longer than the expected length
 			if (data.length < this.metadataSize) {
 				errorOut("Received truncated metadata from Splunk server. Not able to continue.")
@@ -219,17 +306,21 @@ class splunkMessage {
 			data = data.slice(this.metadataSize)
 		} 
 
-		if(data.length == 0) { return ''}
+		logit ("Back in function addData")
 
-		//logit ("Actual Data.length is : " + data.length + ", payloadSize(From header):" + this.payloadSize)
+		if(data.length == 0) { logit("\tData only contained the header and metadata (no payload), returning.");return ''}
+		logit ("\tRemaining data size after parsing metadata is: " + data.length)
+		logit ("\tExpected payload size from header is: " + this.payloadSize)
+
 		// process payload (we could be appending to an existing message)
-		// bug: if the data has newlines in the fields, then the count if off.
-		// (might be windows specific)
+		// TOO: bug: if the data has newlines in the fields, then the count if off. (might be windows specific)
 		if (data.length <= this.payloadSize) {
+			logit("\tadding data to payload")
 			this.rawPayload += data
 			return ''
 		} else {
 			// this usually only hapens if you're having bottlenecks that slow things down.
+			logit ("\tThe data recieved is larger than expected, it's probably another message backed up in the STDIN queue. Returning extra data back for re-processing.")
 			this.rawPayload += data.slice(0, this.payloadSize)
 			return data.slice (this.payloadSize)
 		}
@@ -239,6 +330,7 @@ class splunkMessage {
 	* re-initalize a splunkMessage back to defaults.
 	*/
 	zeroize() {
+		logit ('In Function zeroize')
 		this.rawHeader = ''
 		this.completeHeader = false
 		this.rawMetadata = ""
@@ -264,13 +356,14 @@ class splunkMessage {
 	@ return {boolean} If the splunkMessage is a complete message
 	*/
 	checkMessageComplete() {
+		logit("In function: checkMessageComplete")
 		if(this.metadataCommand == 'getinfo') {
-			if(this.completeHeader && (this.rawMetadata.length ==  this.metadataSize)) {return true}
-			else {return false}
+			if(this.completeHeader && (this.rawMetadata.length ==  this.metadataSize)) {logit("\tGETINFO Message Is Complete."); return true}
+			else {logit("\tGETINFO Message Is NOT Complete.");return false}
 		} else if (this.metadataCommand == 'execute') {
 
 			// bug: with newlines in results, actual payload may be a little smaller than the advertised datasize
-			if (this.rawPayload.length >= this.payloadSize){return true} else {return false}
+			if (this.rawPayload.length >= this.payloadSize){logit("\tEXECUTE Message Is Complete.");return true} else {logit("\tEXECUTE Message Is NOT Complete.");return false}
 		}
 	}
 
@@ -283,6 +376,7 @@ class splunkMessage {
 	* @return {splunkInstance} a new splunkMessage object
 	*/
 	cloneForExecute(){
+		logit("In function: cloneForExecute.")
 		// only a few fields are needed for processing. copy those fields and return new object
 		var x = new splunkMessage()
 		x.inputSearchField =  this.inputSearchField 
@@ -330,6 +424,12 @@ class splunkMessage {
 */
 const errorOut = function(msg){
 	// todo: remove newlines and banned chars from msg (so they don't throw an error)
+
+	// if logging is not known, write it out anyways
+	if (debugEnabled =='') {debugEnabled = "info"}
+	logit ("FATAL ERROR.  Execution failed, sending error back to Splunk. Error: " + msg)
+
+
 	const metadata = '{"finished":true,"error":"'  + msg +'"}'
 	const transportHeader = 'chunked 1.0,' + metadata.length + ",0\n"
 	process.stdout.write(transportHeader)
@@ -360,14 +460,18 @@ const errorOut = function(msg){
 * @todo Make dynamic
 */
 const sendGetInfo = function (msg) {
+	logit ("Entering function sendGetInfo")
 	// which field(s) do we require from splunk, as array of strings
 	searchFields = [msg.inputSearchField]
+
 	
 	if (msg.outputSearchField != msg.inputSearchField ) {searchFields.push( msg.outputSearchField)} 
-
+	logit("\tSearchFields are: " + searchFields)
+	
 	try {
 		jsonReply = JSON.stringify({
 			type: "streaming",
+			preview: true,
 			generating: false,
 			required_fields:  searchFields
 		})	
@@ -377,7 +481,7 @@ const sendGetInfo = function (msg) {
 
 	var transportHeaderReply = 'chunked 1.0,' + jsonReply.length + ',0'
 
-	//logit("sending GETINFO: " + transportHeaderReply +" " + jsonReply)
+	logit("\tSending GETINFO SplunkMessage:\t" + transportHeaderReply +" " + jsonReply)
 
 	process.stdout.write(transportHeaderReply +"\n")
 	process.stdout.write(jsonReply)
@@ -393,6 +497,7 @@ const sendGetInfo = function (msg) {
 */
 const returnProcessedData = function(data){
 
+	logit("In fuction returnProcessedData")
 	// metadata 'Finished' option should match that of Splunk's last message
 	// if =true, then splunk will shutdown further processing
 
@@ -404,20 +509,23 @@ const returnProcessedData = function(data){
 	if(finished ) {var metadata = '{"finished":true}'}
 	else {var metadata = '{"finished":false}'}
 
+	logit("\tmessage finished state is " + metadata )
 
 	// determine if payload is larger than maxPayloadSize, and split the reply into multiple packets if so.
+	// TODO: NOT WORKING, we reuturn all data at once, not in chunks.
 	if(maxPayloadSize == 0 || data.rawPayload.length < maxPayloadSize){
 		// just send it as is
 		const transportHeader = 'chunked 1.0,' + metadata.length + ',' + (data.rawPayload.length) + "\n"
-		//logit("Sending Complete ACTION: " + transportHeader.trim() + ' ' + metadata +' size:' + data.rawPayload.length)
-		//logit(data.rawPayload + "<<EOF>>")
+		logit("\tSending Complete ACTION: " + transportHeader.trim() + ' ' + metadata +' ; payload size is: ' + data.rawPayload.length)
+		if(debugEnabled == 'full') {logit( "\tRaw Payload sent is: \n" + data.rawPayload + "<<EOF>>")}
 
 		process.stdout.write(transportHeader)
 		process.stdout.write(metadata)
 		process.stdout.write(data.rawPayload)
 
-		//logit(data.rawPayload + "<<END>>")
+
 	} else {
+		// TODO: NOT WORKING (Do not Use)
 		// break it up. get the header from the first line
 		logit("Sending Partial ACTION packets.")
 		var csvHeader = data.rawPayload.split('\n')[0] + "\n"
@@ -469,6 +577,8 @@ const returnProcessedData = function(data){
 		//    while(new Date().getTime() < now + 5000){ /* do nothing */ } 
 		//    logit("...Awake!")
 	}
+
+	logit("leaving function returnProcessedData")
 }
 
 /**
@@ -481,6 +591,8 @@ const returnProcessedData = function(data){
 const processPayload = function(msg){
 	// where the magic hapens. Modify the payload here before returning it.
 	// load cyberchef and csv-string modules. delayed so we don't load it for each GETINFO command which doesn't use it
+
+	logit('In function processPayload')
 
 	try {
 		var chef = require("cyberchef")
@@ -499,13 +611,14 @@ const processPayload = function(msg){
 
 	// take the raw payload (headers and data) from the message, convert to object
 	try {
-		//var events = CSV.parse(msg.rawPayload)
 		var events = parse(msg.rawPayload , {
 			columns: true	//Infer the columns names from the first line.
 		})
 	} catch (err) {
 		errorOut("Fatal Error in function processPayload:  csv-parse error on payload: " + err.message)
 	}
+
+	logit('\tNumber of events to process: ' + events.length)
 
 	// Determine if we're running a simple operation, a complex recipe loaded from file, or a b64-encoded recipe
 	var cmdToRun = ''
@@ -536,6 +649,9 @@ const processPayload = function(msg){
 		}
 	}
 
+	// todo: fix this so it doesn't print [object Object]
+	logit("\tcyberchef command to run is: " + cmdToRun[0].toString())
+
 	// Iterate over each row of data and process with cyberchef
 	const newrecords = transform(events, function(record){
 		try {
@@ -546,7 +662,7 @@ const processPayload = function(msg){
 	  	return record
 	})
 
-	//logit("processed " + newrecords.length + " records to return")
+	logit("\tprocessed " + newrecords.length + " records to return")
 	// convert objects back to csv string and save back to our message
 	try {
 		//return CSV.stringify(events)
@@ -627,10 +743,11 @@ process.stdin.on('readable', () => {
 	//process.stderr.write("THIS SHOWS AS ERROR IN search.log (non-fatal though)")
 	//messageUser("a")
 
+	logit("Entering function process.stdin.on")
 	// receive whatever data is in stdin
 	chunk = ''
 	var chunk = process.stdin.read();
-	// logit("<<SOF>>" + chunk + "<<EOF>>")
+	if (debugEnabled == '' || debugEnabled == 'full' ) {logit("\tReceived raw chunk of data via stdin:\n" + chunk + "<<EOF>>")}
 
 	if (chunk == null) { return }
 	
@@ -639,15 +756,15 @@ process.stdin.on('readable', () => {
 
 		// convert the stdin chunk into a splunkMessage. could be too short or multiple messages in one
 		chunk = workingMessage.addData(chunk)
-		
+		if(chunk.length > 0) {logit("\tRecieved multiple messages at once via stdin (not an issue, just rare).  Maybe there are some performance issues to look at on your system?")}
 
 		if (workingMessage.checkMessageComplete()){
 			// if packet is getinfo, send capabilities reply
-			//logit("recieved Complete Message: " + workingMessage.metadataCommand + ", " + workingMessage.rawMetadata)
+			logit("\tRecieved complete SplunkMessage of type: " + workingMessage.metadataCommand )
 
 			if(workingMessage.metadataCommand == 'getinfo'){
 				sendGetInfo(workingMessage)
-				getinfoMessage = workingMessage.cloneForExecute()
+				getinfoMessage = workingMessage.cloneForExecute()	// save info from the command
 				workingMessage.zeroize()
 				return
 			} else if(workingMessage.metadataCommand == 'execute') {
@@ -658,9 +775,11 @@ process.stdin.on('readable', () => {
 				const payloadLines = workingMessage.rawPayload.split(/\r\n|\r|\n/)
 				if(payloadLines.length == 2 && payloadLines[1].length == 0) {
 					// todo: check for finsied=true flag
+					logit("\tRecieved empty payload, sending same back (probably end of data).")
 					process.stdout.write(workingMessage.rawHeader + "\n" + workingMessage.rawMetadata + workingMessage.rawPayload )
 
 				} else {
+					// We need to process the payload
 					// copy the search info from our getInfoMessage to the data message
 					workingMessage.inputSearchField 	= getinfoMessage.inputSearchField
 					workingMessage.outputSearchField 	= getinfoMessage.outputSearchField
@@ -670,7 +789,7 @@ process.stdin.on('readable', () => {
 					workingMessage.jsonRecipe 			= getinfoMessage.jsonRecipe
 					// load recipes:
 					if (workingMessage.recipe.length != 0) {
-						//logit("loading Reipes from file...." + getinfoMessage.recipe)
+						logit("\tTrying to load Recipe from file: " + getinfoMessage.recipe)
 						workingMessage.recipeJson = loadRecipesFromFile(getinfoMessage.recipe)
 					}
 
@@ -685,6 +804,7 @@ process.stdin.on('readable', () => {
 				errorOut("Fatal Error in function process.stdin.on: Unknown message type: " + workingMessage.metadataCommand)
 			}
 		} else {
+			logit ("\trecieved partial SplunkMessage, waiting for rest of message via stdin.")
 			// we recieved a partial message, when we loop back through we'll build the rest of the message
 			// (splunk doesn't write full messages to stdout in one big chunk)
 		}
