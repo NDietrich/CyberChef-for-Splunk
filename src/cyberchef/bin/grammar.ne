@@ -52,14 +52,16 @@ FIELDNAMECHARS	-> [\w] 							{% id %}
 # Fieldnames that are single-quoted can be anything (except the single quote, unless escaped)
 # todo: pipe not supported here
 QUOTEDFIELDNAME			-> 	QUOTEDFIELDNAMECHAR:+	{% function(d) {return  d[0].join('') }  %}
-QUOTEDFIELDNAMECHAR		-> 	[ -&]					{% id %}  # exclude the single quote here
-						| 	[(-~]					{% id %}  # exclude the single quote here
-						|	"\\'"					{% function(d) {return  "'" }  %} # escaped single quote
+QUOTEDFIELDNAMECHAR		-> 	"\\|"					{% function(d) {return  "|" }  %} # escaped pipe (ASCII 125)
+						|	"\\'"					{% function(d) {return  "'" }  %} # escaped single quote (ASCII 39)
+						|	[ -&]					{% id %}  # ASCII 32 (space) through 38 (ampersand)
+						| 	[(-{]					{% id %}  # ASCII 40 (r-paren) through 123 (l-bracket)
+						|	[}-~]					{% id %}  # ASCII 125 (r-bracket) through 126 (tilde)
 						
 # String values that contain anything other than a-z, A-Z, 0-9, or the underscore ( _ ) character, 
 # need double quotation marks. This includes the wildcard ( * ) character.
 # CHARSET for the options
 QUOTEDOPTCHARS	-> 	QUOTEDOPTCHAR:+		{% function(d) {return  d[0].join('') }  %}
-QUOTEDOPTCHAR 	-> 	"\\|"				{% function(d) {return  "|" }  %} # pipe char
-				|	[ -{]				{% id %}  # all ASCII chars from space to tilde
-				|	[}-~]				{% id %}  # all ASCII chars from space to tilde
+QUOTEDOPTCHAR 	-> 	"\\|"				{% function(d) {return  "|" }  %} # escaped pipe (ASCII 125)
+				|	[ -{]				{% id %}  # ASCII 32 (space) through  123 (l-bracket)
+				|	[}-~]				{% id %}  # ASCII 125 (r-bracket) through 126 (tilde)
