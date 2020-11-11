@@ -2,12 +2,14 @@
 
 /*-------------------------------------------------------------------------------------------
 // TODO:
-- 	fix grammer to handle quotes properly (escaped)
+
 -	troubleshoot windows newlines in data
 -	troubleshoot csv file input
 -	test on linux
 -	update commands.conf for new option (jsonRecipe) and examples
 -	get logo
+
+
 
 
 // TODO v2
@@ -18,6 +20,9 @@
 -	modify script to handle debug option correclty
 - 	ensure log file is written before error out
 -	log output data if debug=full
+-	log to dispatch dir only if matches nnnnnnnnn.nnn
+- 	fix grammer to handle quotes properly (escaped)
+-	add pipe as escaped char for quotedfield name
 
 -------------------------------------------------------------------------------------------*/
 
@@ -52,6 +57,7 @@ const logit = function (msg) {
 	//fs.appendFileSync('jsStdout.txt', process.pid +":  " + msg + "\n", function (err) { if (err) throw err; }); 
 
 	if (debugEnabled == 'none') {return}
+	if (dispatch_dir == null ) {return}
 
 	// if debugEnbaled hasn't been set yet, just archive the log data to the 'debugRecords' variable to write later (if wanted)
 	if (debugEnabled == '') {
@@ -61,9 +67,9 @@ const logit = function (msg) {
 
 	} else {
 		var logFileName = dispatch_dir + '\\cyberchef.log'
-		var logFileName = 'jsStdout.txt'	// TODO remove this line (with above)
+		var logFileName = 'cyberchef.log'	// TODO remove this line (with above)
 		// check if we have anything in our debugRecords var to log first
-		if (debugRecords.length >= 0) {
+		if (debugRecords.length > 0) {
 			fs.appendFileSync(logFileName,  debugRecords, function (err) { if (err) errorOut("Error writing debug log file " + logFileName + '; ' + err.message) })
 			debugRecords = ''
 		}
@@ -83,7 +89,7 @@ const logit = function (msg) {
 const maxPayloadSize = 0		// do not exceed in reply or Splunk will error. Must be =< maxchunksize in commands.conf
 								// NOTE: NOT WORKING. Keep at 0.
 
-var dispatch_dir = ''		// the directory splunk uses for logging for this search
+var dispatch_dir = 'unknown'		// the directory splunk uses for logging for this search
 							// passed in getinfo, can be blank, end in tmp (ex .../283e00c9b0176a64_tmp), or a the full directory
 							// useful for logging
 
@@ -174,8 +180,16 @@ class splunkMessage {
 			} catch (err) {
 				errorOut("Fatal error in function parseMetadata: Error parsing metadata JSON for dispatch_dir field:" + err.message)
 			}
-			
 			logit ("\t(from metadata json header) dispatch_dir is: "  + dispatch_dir)
+
+
+			// (TOOD:FIX)if dispatch_dir doesn't match nnnnnnnnn.nnn, then ignore logging
+			if (dispatch_dir.match(/\d{10}\.\d{3}$/) != null){
+				//dispatch_dir = 'C:\\Program Files\\Splunk\\etc\\apps\\cyberchef\\bin'
+			} else {
+				dispatch_dir = null
+			}
+			
 
 	    	// get searchOptions and field names from metadta JSON
 			try {
@@ -471,8 +485,6 @@ const sendGetInfo = function (msg) {
 	try {
 		jsonReply = JSON.stringify({
 			type: "streaming",
-			preview: true,
-			generating: false,
 			required_fields:  searchFields
 		})	
 	} catch(err) {
