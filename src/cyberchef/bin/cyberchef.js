@@ -5,18 +5,9 @@
 
 -	fix file creation dates with powershell
 
--	create 'about' dashboard
-
 -	get logo
--	test on BSD
-
--	rename b64recipe to not have letters in it
--	more liberal grammar for fieldnames (single quotes, \w, etc)
--	allow single-quotes on operation
 
 
-recipe -> savedRecipe
-b64recipe -> encodedRecipe
 
 // TODO v2
 -	new script to list all recipes 
@@ -34,30 +25,14 @@ b64recipe -> encodedRecipe
 - 	fix grammer to handle quotes properly (escaped)
 -	add pipe as escaped char for quotedfield name
 -	update commands.conf for new option (jsonRecipe) and examples
+-	create 'about' dashboard
 
+-	rename b64recipe to not have letters in it
+-	more liberal grammar for fieldnames (single quotes, \w, etc)
+-	allow single-quotes on operation
+recipe -> savedRecipe
+b64recipe -> encodedRecipe
 
--------------------------------------------------------------------------------------------*/
-
-//	EXAMPLE SEARCHES
-// index=wineventlog sourcetype="WinEventLog:Security" 
-// | head 10 
-// | cyberchef infield=RecordNumber outfield=xxx jsonRecipe="[{"op":"To Base64","args":["A-Za-z0-9+/="]}]" 
-// | table RecordNumber xxx
-
-// source="download.csv" host="FIREFLY-WIN" index="vox_covid" sourcetype="ecdc.europa.eu-csv" 
-// | cyberchef infield=cases outfield=xxx jsonRecipe="[{"op":"To Base64","args":["A-Za-z0-9+/="]}]" 
-// | table cases xxx
-
-// ERROR (due to newlines)
-// index=wineventlog sourcetype="WinEventLog:Security" 
-// | head 1
-// | cyberchef infield=Message outfield=xxx jsonRecipe="[{"op":"To Base64","args":["A-Za-z0-9+/="]}]" 
-// | table Message xxx
-
-//-------------------------------------------------------------------------------------------
-// Current Bugs:
-//	1. if your source data has newlines, then this won't work.
-//	2. FieldNames: don't have to escape fieldnames like the rest of splunk, ascii only
 
 
 //-------------------------------------
