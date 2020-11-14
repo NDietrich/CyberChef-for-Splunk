@@ -33,23 +33,25 @@ OPERATION		->	RECIPEOPTION 	{% id %}
 				|	B64RECIPE		{% id %}
 				|	JSONRECIPE		{% id %}
 
-RECIPEOPTION	->	"recipe"i _ "=" _ [\w]:+					{% function(d) {return {recipe:d[4].join('')}}  %}
-				|	"recipe"i _ "=" _ "\"" QUOTEDOPTCHARS "\"" 		{% function(d) {return {recipe:d[5]}}  %}
+RECIPEOPTION	->	"savedrecipe"i _ "=" _ [\w]:+						{% function(d) {return {savedrecipe:d[4].join('')}}  %}
+				|	"savedrecipe"i _ "=" _ "\"" QUOTEDOPTCHARS "\"" 		{% function(d) {return {savedrecipe:d[5]}}  %}
+				|	"savedrecipe"i _ "=" _ "'" QUOTEDOPTCHARS "'" 		{% function(d) {return {savedrecipe:d[5]}}  %}
 				
-OPPOPTION		-> 	"operation"i _ "=" _ [\w]:+				{% function(d) {return {operation:d[4].join('')}}  %}
+OPPOPTION		-> 	"operation"i _ "=" _ [\w]:+						{% function(d) {return {operation:d[4].join('')}}  %}
 				|	"operation"i _ "=" _ "\"" QUOTEDOPTCHARS "\"" 	{% function(d) {return {operation:d[5]}}  %}
+				|	"operation"i _ "=" _ "'" QUOTEDOPTCHARS "'" 	{% function(d) {return {operation:d[5]}}  %}
 				
-B64RECIPE		-> 	"b64recipe"i _ "=" _ [a-zA-Z0-9=/+]:+	{% function(d) {return {b64recipe:d[4].join('')}}  %}
-				|	"b64recipe"i _ "=" _ "\"" [a-zA-Z0-9=/+]:+ "\"" 		{% function(d) {return {b64recipe:d[5].join('')}}  %}
+B64RECIPE		-> 	"encodedrecipe"i _ "=" _ [a-zA-Z0-9=/+]:+				{% function(d) {return {encodedrecipe:d[4].join('')}}  %}
+				|	"encodedrecipe"i _ "=" _ "\"" [a-zA-Z0-9=/+]:+ "\"" 	{% function(d) {return {encodedrecipe:d[5].join('')}}  %}
+				|	"encodedrecipe"i _ "=" _ "'" [a-zA-Z0-9=/+]:+ "'" 	{% function(d) {return {encodedrecipe:d[5].join('')}}  %}
 
-JSONRECIPE		-> "jsonRecipe"i _ "=" _ "\"" QUOTEDOPTCHARS "\"" 		{% function(d) {return {jsonRecipe:d[5]}}  %}
+JSONRECIPE		-> 	"jsonrecipe"i _ "=" _ "\"" QUOTEDOPTCHARS "\"" 		{% function(d) {return {jsonRecipe:d[5]}}  %}
+				|	"jsonrecipe"i _ "=" _ "'" QUOTEDOPTCHARS "'" 		{% function(d) {return {jsonRecipe:d[5]}}  %}
 				
-# for standard FieldNames. Start with a letter, then any letter, number, or underscore
-# spl2 may allow \w for all fieldnames here, todo
-FIELDNAME		-> [a-zA-Z] FIELDNAMECHARS:*		{% function(d) {return  d[0].concat(d[1].join('')) }  %}
-FIELDNAMECHARS	-> [\w] 							{% id %}
+# unquoted and double-quoted fieldnames (this is more permissive than SPL2 syntax, but is easier and just as clear)
+FIELDNAME		->[\w]:+		{% function(d) {return  d[0].join('') }  %}
 
-# Fieldnames that are single-quoted can be anything (except the single quote, unless escaped)
+# Fieldnames that are single-quoted can be anything (except the single quote or pipe, unless escaped)
 # todo: pipe not supported here
 QUOTEDFIELDNAME			-> 	QUOTEDFIELDNAMECHAR:+	{% function(d) {return  d[0].join('') }  %}
 QUOTEDFIELDNAMECHAR		-> 	"\\|"					{% function(d) {return  "|" }  %} # escaped pipe (ASCII 125)
@@ -58,9 +60,8 @@ QUOTEDFIELDNAMECHAR		-> 	"\\|"					{% function(d) {return  "|" }  %} # escaped
 						| 	[(-{]					{% id %}  # ASCII 40 (r-paren) through 123 (l-bracket)
 						|	[}-~]					{% id %}  # ASCII 125 (r-bracket) through 126 (tilde)
 						
-# String values that contain anything other than a-z, A-Z, 0-9, or the underscore ( _ ) character, 
-# need double quotation marks. This includes the wildcard ( * ) character.
-# CHARSET for the options
+# String values that are quoted, only the pipe needs to be escaped (we don't have to escape single or double-quotes
+# because we force this option to be the last field.
 QUOTEDOPTCHARS	-> 	QUOTEDOPTCHAR:+		{% function(d) {return  d[0].join('') }  %}
 QUOTEDOPTCHAR 	-> 	"\\|"				{% function(d) {return  "|" }  %} # escaped pipe (ASCII 125)
 				|	[ -{]				{% id %}  # ASCII 32 (space) through  123 (l-bracket)

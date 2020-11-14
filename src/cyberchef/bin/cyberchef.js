@@ -3,17 +3,27 @@
 /*-------------------------------------------------------------------------------------------
 // TODO:
 
--	troubleshoot windows newlines in data
--	troubleshoot csv file input
--	test on linux
--	update commands.conf for new option (jsonRecipe) and examples
+-	fix file creation dates with powershell
+
+-	create 'about' dashboard
+
 -	get logo
+-	test on BSD
+
+-	rename b64recipe to not have letters in it
+-	more liberal grammar for fieldnames (single quotes, \w, etc)
+-	allow single-quotes on operation
 
 
-
+recipe -> savedRecipe
+b64recipe -> encodedRecipe
 
 // TODO v2
 -	new script to list all recipes 
+-	troubleshoot windows newlines in data
+-	troubleshoot csv file input
+-	test on linux
+-	fix searchbnf.conf
 
 // DONE
 - 	fix grammer to incude debug=full/info
@@ -23,6 +33,8 @@
 -	log to dispatch dir only if matches nnnnnnnnn.nnn
 - 	fix grammer to handle quotes properly (escaped)
 -	add pipe as escaped char for quotedfield name
+-	update commands.conf for new option (jsonRecipe) and examples
+
 
 -------------------------------------------------------------------------------------------*/
 
@@ -243,11 +255,11 @@ class splunkMessage {
 							this.inputSearchField = value; break
 						case 'outfield':
 							this.outputSearchField = value; break
-						case 'recipe':
+						case 'savedrecipe':
 							this.recipe  = value.toLowerCase(); break
 						case 'operation':
 							this.operation = value; break
-						case 'b64recipe':
+						case 'encodedrecipe':
 							this.b64recipe = value; break
 						case 'jsonRecipe':
 							this.jsonRecipe = value; break	
