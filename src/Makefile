@@ -18,7 +18,8 @@ endef
 # Prepare a source folder to be turned into a spl file, do NOT remove the local directory
 define clean_src_folder
 # remove all hidden files and folders
-	find ./ -name ".*" -exec rm -rf {} \;
+# todo: not working (finds local directory ./)
+#	find ./ -name ".*" -exec rm -rf {} \;
 	
 # remove any files in metadata that aren't default.meta
 	rm -rf ./metadata/local.meta || true
