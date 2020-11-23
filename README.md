@@ -1,11 +1,11 @@
 # Overview
-This repository is for the "CyberChef for Splunk" App for Splunk.  This Splunk App provides a Custom Search Command (Search Processing Language) for the [CyberChef](https://gchq.github.io/CyberChef/) node [api](https://github.com/gchq/CyberChef/wiki/Node-API), allowing you to apply CyberChef operations and complex recipes to your search results.
+This repository is for the "CyberChef for Splunk" App for Splunk.  This Splunk App provides a Custom Search Command (Search Processing Language) for the [CyberChef](https://gchq.github.io/CyberChef/) node [api](https://github.com/gchq/CyberChef/wiki/Node-API), allowing you to apply CyberChef operations and recipes to your search results.
 
 # License
-This App is released under the GPL v3 license. Please see the LICENSE file. CyberChef is released under the Apache 2.0 License and is covered by Crown Copyright.
+This App is released under the GPL v3 license. CyberChef is released under the Apache 2.0 License and is covered by Crown Copyright.
 
 # Installing
-This App can be installed directly from [SplunkBase](https://splunkbase.splunk.com/), or you can use this repository to modify and create a stand-alone version of this App, or [download the app](https://github.com/NDietrich/CyberChef-for-Splunk/releases) and install manually. You only need to use this repository if you want to modify the App yourself, or if you don't want to download the plugin from Splunk directly. In most cases, you should download this App directly from [SplunkBase](https://splunkbase.splunk.com/) via your local Splunk instance.  If you want to modify this app, please see these [instructions](https://github.com/NDietrich/CyberChef-for-Splunk/blob/main/src/README.md).
+For most instances, you will want to install this App on your Splunk servers directly from [SplunkBase](https://splunkbase.splunk.com/).  You can also download the App (in .spl format) from github if you prefer: [releases](https://github.com/NDietrich/CyberChef-for-Splunk/releases) and install manually.  If you want to modify this App, this repository has a [makefile](https://github.com/NDietrich/CyberChef-for-Splunk/blob/main/src/Makefile) to build this App.  You only need to clone this repository if you want to modify the App yourself. If you want to modify this app, please see these [instructions](https://github.com/NDietrich/CyberChef-for-Splunk/blob/main/src/README.md).
 
 # Usage
 Please see the [instructions](https://github.com/NDietrich/CyberChef-for-Splunk/blob/main/src/cyberchef/README.md) for using this App.
