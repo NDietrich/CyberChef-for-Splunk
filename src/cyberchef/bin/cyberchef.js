@@ -1,35 +1,37 @@
 
 
 /*-------------------------------------------------------------------------------------------
-// TODO:
 
+// OVERVIEW
+This node.js script is the main part of the 'CyberChef for Splunk' App that provides a Custom Search Command 
+(Search Processing Language) for the CyberChef node api, allowing you to apply CyberChef operations and recipes 
+to your search results.
 
-// TODO for Next Version (v2)
--	new script to list all recipes 
--	troubleshoot windows newlines in data
--	troubleshoot csv file input
--	fix searchbnf.conf
+// LICENSE
+This code is released under the GPL v3 License, while CyberChef is released under the Apache 2.0 License,
+and is covered by Crown Copyright.
 
-// DONE
-- 	fix grammer to incude debug=full/info
--	modify script to handle debug option correclty
-- 	ensure log file is written before error out
--	log output data if debug=full
--	log to dispatch dir only if matches nnnnnnnnn.nnn
-- 	fix grammer to handle quotes properly (escaped)
--	add pipe as escaped char for quotedfield name
--	update commands.conf for new option (jsonRecipe) and examples
--	create 'about' dashboard
+// ABOUT
+This app implements version 2 of Splunk's custom search protocol manually (since there's no SDK for node.js), 
+which I had to reverse-engineer with limited documentation. Therefore, there are very likely some edge cases 
+that you will run into that need to be fixed. Please submit them via Github with as much information as possible 
+(that will allow me to easily re-create and fix the issue).
 
--	rename b64recipe to not have letters in it
--	more liberal grammar for fieldnames (single quotes, \w, etc)
--	allow single-quotes on operation
-recipe -> savedRecipe
-b64recipe -> encodedRecipe
+If you're looking to implement your own Custom Search Command in javascript (leveraging node.js), or another 
+language that isn't python (since there's a nice Splunk SDK for python), it's certainly possible (as this App proves).
+That being said, it's a lot of work, and my recomendation would be to seriously consider sticking with python, since
+the protocol isn't well documented (and Splunk doesn't make it easy to read from stdin, since not all messages end with a 
+newline).  You also have to do a lot of work yourself parsing the input parameters, and crafting the correct message 
+format to return.
 
--	fix file creation dates with powershell
--	get logo
--	test on linux
+// MORE ABOUT
+if you're an expert in node.js, you'll find this code to be prety ugly.  This code is not properly leveraging node.js's 
+asynchronous nature for the most part, and looks suspiciously like someone who came of age when c++ was the language 
+of choice for computer science courses.   But it works, and that's the important part.
+
+Future releases will implement node.js paradigms, as well as focus on performance increases (either by pre-loading the
+cyberchef libraries, or by selectively loading only the required libraries for each command).
+
 
 */
 
