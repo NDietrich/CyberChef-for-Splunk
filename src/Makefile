@@ -18,27 +18,27 @@ endef
 # Prepare a source folder to be turned into a spl file, do NOT remove the local directory
 define clean_src_folder
 # remove all hidden files and folders
-	find -mindepth 1 -name '.*' -exec rm -rf {} \;
+	find ./build -mindepth 1 -name '.*' -exec rm -rf {} \;
 	
 # remove any files in metadata that aren't default.meta
-	rm -rf ./metadata/local.meta || true
+	rm -rf ./build/metadata/local.meta || true
 
 # all files should be 644, directories should be 755
 # http://dev.splunk.com/view/app-cert/SP-CAAAE3H
-	find ./ -type f -exec chmod 644 {} \;
-	find ./ -type d -exec chmod 755 {} \;
+	find ./build -type f -exec chmod 644 {} \;
+	find ./build -type d -exec chmod 755 {} \;
 
 # get rid of all .pyc files in bin (todo, not working)
 #find ./bin -type f -name '*.pyc' -delete 2>/dev/null
 
 # remove all temp files (ending with tilde)
-	find . -type f -name '*~' -exec rm -f '{}' \; 
+	find ./build -type f -name '*~' -exec rm -f '{}' \; 
 endef
 
 # Build SPL file
 define build_SPL
 # create spl file (tar.gz)
-	cd ./build ; tar -zcvf ${APPNAME}.tar.gz ${APPNAME}
+	cd ./build ; tar -zcf ${APPNAME}.tar.gz ${APPNAME}
 	mv ./build/${APPNAME}.tar.gz ${APPNAME}.spl
 
 endef
