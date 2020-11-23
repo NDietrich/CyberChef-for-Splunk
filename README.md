@@ -23,8 +23,9 @@ data                        | convertedData
 1.233951602074389	          | MS4yMzM5NTE2MDIwNzQzODk=
 1.738851991598791	          | MS43Mzg4NTE5OTE1OTg3OTE=
 
+Here we generate three results with random data in the 'data' field (the first three lines of SPL).  We then use CyberChef's **toBase64** operation to convert the values in the *'data'* field to base-64 representation, and save the results to the *'convertedData'* field.
 
-This is a simplistic example for simplicity's sake.  This App has a lot of additional functionality, described in the [instructions](https://github.com/NDietrich/CyberChef-for-Splunk/blob/main/src/cyberchef/README.md).
+This is a simple example for clarity's sake.  This App has a lot of additional functionality, described in the [instructions](https://github.com/NDietrich/CyberChef-for-Splunk/blob/main/src/cyberchef/README.md).
 
 # Requesting Help
 Please submit bug and feature requests via [Github](https://github.com/NDietrich/Splunk-Snort3-TA/issues) for this project, or email Noah@SublimeRobots.com.  Please include as much information as possible with your request.  This TA is not professionally supported (it is a volunteer project), so issues may not be fixed immediately, but I will make every effort to reply.
