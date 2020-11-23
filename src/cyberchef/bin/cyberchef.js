@@ -3,17 +3,11 @@
 /*-------------------------------------------------------------------------------------------
 // TODO:
 
--	fix file creation dates with powershell
 
--	get logo
-
-
-
-// TODO v2
+// TODO for Next Version (v2)
 -	new script to list all recipes 
 -	troubleshoot windows newlines in data
 -	troubleshoot csv file input
--	test on linux
 -	fix searchbnf.conf
 
 // DONE
@@ -32,11 +26,16 @@
 -	allow single-quotes on operation
 recipe -> savedRecipe
 b64recipe -> encodedRecipe
+
+-	fix file creation dates with powershell
+-	get logo
+-	test on linux
+
 */
 
 
 //-------------------------------------
-// 			DEBUG
+// 			Logging
 //-------------------------------------
 
 const fs = require('fs'); 
@@ -54,7 +53,8 @@ const logit = function (msg) {
 
 	} else {
 		var logFileName = dispatch_dir + '\\cyberchef.log'
-		var logFileName = 'cyberchef.log'	// TODO remove this line (with above)
+		// var logFileName = 'cyberchef.log'	// For local debugging to 'bin' directory
+
 		// check if we have anything in our debugRecords var to log first
 		if (debugRecords.length > 0) {
 			fs.appendFileSync(logFileName,  debugRecords, function (err) { if (err) errorOut("Error writing debug log file " + logFileName + '; ' + err.message) })
@@ -240,11 +240,10 @@ class splunkMessage {
 							this.jsonRecipe = value; break	
 						case 'debug':
 							debugEnabled = value; 
-							// todo: check that we have a valid dispatch_dir here (form 1604422794.566)
-							// todo: dump past debug info
 							break
 						default:
-							// todo: unknown option here
+							// unknown option here
+							errorOut("Error trying to parse input options. Unknown parameter received")
 							break			
 					}
 
