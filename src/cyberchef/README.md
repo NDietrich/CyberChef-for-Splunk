@@ -10,19 +10,19 @@ This Splunk App provides a Custom Search Command named **cyberchef** that allows
  | table data convertedData
 ```
 When you run the above example, you'll get something like the following output:
-```
+
 data                        | convertedData
 --------------------------- | ------------------
 1.267541990694              | MS4yNjc1NDE5OTA2OTQ=
-1.233951602074389	        | MS4yMzM5NTE2MDIwNzQzODk=
-1.738851991598791	        | MS43Mzg4NTE5OTE1OTg3OTE=
-```
-Here we generate three results with random data in the 'data' field. We then use CyberChef's toBase64 operation to convert the values in the 'data' field into it's base-64 representation and save the results to the 'convertedData' field.
+1.233951602074389	          | MS4yMzM5NTE2MDIwNzQzODk=
+1.738851991598791	          | MS43Mzg4NTE5OTE1OTg3OTE=
+
+Here we generate three results with random data in the *'data'* field (the first three lines of SPL). We then use CyberChef's **toBase64** operation to convert the values in the *'data'* field into base-64 representation, and save the results to the *'convertedData'* field. Finally, we display the data in a table.
 
 # Installation
 You should install this App on all your Splunk Indexers and Search Heads (there is no benefit or harm to installing it on any forwarders).  You must reboot Splunk after installation. No configuration is required to use this App.
 
-This App runs on Windows and Linux, and works with Splunk versions 7 - 8.1.
+This App runs on Windows and Linux, and works with Splunk versions 7.3 - 8.1.
 
 # Usage
 This App will allow you to apply CyberChef operations and recipes through a custom search command named **cyberchef**.  This custom search command requires that you specify the input field to operate on, the CyberChef operation or recipe to apply to the data in that field, and optionally a different output field to write the results to.
@@ -42,9 +42,9 @@ A CyberChef **operation** is a single function applied to the specified field fo
 
 A CyberChef **recipe** is one or more operations chained together, where each operation can have optional parameters.  For example: converting data into a base64-encoded string (using the *ToBase64* operation), and then calculating the SHA3 hash with an output size of 256 of that base64 encoded data using the *SHA3* operation with the 256 output-size option.
 
-Recipes (versus operations) must be formatted in CyberChef's compact json format (more information below), which can be done through the CyberChef web GUI.
+Recipes (versus an operation) must be formatted in CyberChef's compact json format (more information below), which can be done through the CyberChef web GUI.
 
-Please make sure to read the section below titled **Charsets, Quotes, and Escaped Characters** and **Parameter ordering** before you try to use this app, as command ordering is important.
+Please make sure to read the section below titled **Charsets, Quotes, and Escaped Characters** and **Parameter ordering** before you try to use this app to avoid errors, as parameter ordering is important.
 
 ## **operation** parameter
 This is the simplest method, and allows you to apply a single CyberChef operation without any parameters.
@@ -59,6 +59,7 @@ If you want to save the results to a different (or newly created field), include
 ```
 ... | cyberchef infield='inData' outfield=outData operation="ToBase64" |...
 ```
+
 ## **jsonRecipe** parameter
 If you need to use multiple operations (a recipe), or your operations require non-default parameters, you can't use the **operation** parameter. One way to solve this is with the **jsonRecipe** parameter. This allows you to specify a complete recipe in your SPL command.  The recipe is formated in compact-json.
 
@@ -110,7 +111,7 @@ See the [./default/recipes/READEME.txt](./default/recipes/READEME.txt) file incl
 This optional parameter specifies which field to write the results of the CyberChef operation or recipe to.  If you don't specify this field, then the results will be written back to the field specified by the **infield** parameter.  You can specify an existing or new field with this parameter. If the field already exists, the value will be overwritten with the results. If the field does not exist, it will be created in your results.  If CyberChef is not able to process the data in your infield (say you tried to apply an invalid operation to your data), the outfield will be blank for that event.
 
 ## **Debug** parameter
-This optional parameter can either be set to **full** for full debug information (including the contennt of messages passed between splunk and this app, including your events), or to **info** for the same information, excluding the actual data sent and received.  The debug information is saved to a file named cyberchef.log in the search's dispatch directory.  If you have a problem and are requesting assitance from the developer, you'll probably want to include the debug log.
+This optional parameter can either be set to **full** for full debug information (including the contennt of messages passed between splunk and this app, including the data from your events), or to **info** for the same information, excluding the actual data sent and received.  The debug information is saved to a file named **cyberchef.log** in the search's dispatch directory.  If you have a problem and are requesting assitance, you'll probably want to include the debug log.
 
 # Important Notes
 **Parameter Ordering**
@@ -119,7 +120,10 @@ You must start with the **infield** parameter, followed by the optional **outfie
 **Charsets, Quotes, and Escaped Characters**
 This command only supports the ASCII characterset in the SPL (but can support any Unicode characters in your data). What this means is that your fieldnames and your recipes must be ASCII chars; essentially if you type it in as SPL, it must be ASCII. If you have non-ASCII characters in your json or recipe, you can either use the **encodedreipce** or **savedrecipe** option to run the command. 
 
-This command should be able to handle most types of quotes for field names (infield and outfield).  If your field name only has alphanumeric characters (\\w), you don't need to quote it, otherwise use single-quotes for your field names, and escape the single-quote and the pipe character.
+This command should be able to handle most types of quotes for field names (infield and outfield).  If your field name only has alphanumeric characters (the \\w character set), you don't need to quote it, otherwise use single-quotes for your field names.  For fieldnames, you must escape the single-quote and the pipe character.  For example, if you have a field named ```a|b```, and you wanted to save the output to a field named ```b 'or' a```, your command would be:
+```
+... | cyberchef infield='a\|b' outfield='b \'or\' a' ...
+```
 
 For the **encodedRecipe** parameter, you don't need quotes (but they won't hurt).
 
