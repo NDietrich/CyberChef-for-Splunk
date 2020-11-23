@@ -105,6 +105,18 @@ You don't need to reboot Splunk to use these recipes, but you need to make sure 
 ... | cyberchef infield = 'inData' recipe = "myComplexRecipe" |...
 ```
 
+To test this, I have made two savedRecipe examples avaliable. The First coverts the event to moorse code:
+```
+... | cyberchef infield='inData' recipe=example_moorse  |...
+```
+
+the second example converts the event to to base64, then to moorse code:
+```
+... | cyberchef infield='inData' recipe=example_xml_moorse  |...
+```
+
+You can have as many text files you want, with as many saved recipes as you want.  This App will parse all text files in the *./local/recipe/* folder for recipes.  The first matching recipe name will be used.
+
 See the [./default/recipes/READEME.txt](./default/recipes/READEME.txt) file included with this App for more details.
 
 ## **outfield** parameter
