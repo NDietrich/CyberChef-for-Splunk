@@ -19,9 +19,6 @@
 1.233951602074389           | MS4yMzM5NTE2MDIwNzQzODk=
 1.738851991598791           | MS43Mzg4NTE5OTE1OTg3OTE=</code></pre>
 <p>Here we generate three results with random data in the 'data' field. We then use CyberChef's toBase64 operation to convert the values in the 'data' field into it's base-64 representation and save the results to the 'convertedData' field.</p>
-<h1 id="installation">Installation</h1>
-<p>You should install this App on all your Splunk Indexers and Search Heads (there is no benefit or harm to installing it on any forwarders). You must reboot Splunk after installation. No configuration is required to use this App.</p>
-<p>This App runs on Windows and Linux, and works with Splunk versions 7 - 8.1.</p>
 <h1 id="usage">Usage</h1>
 <p>This App will allow you to apply CyberChef operations and recipes through a custom search command named <strong>cyberchef</strong>. This custom search command requires that you specify the input field to operate on, the CyberChef operation or recipe to apply to the data in that field, and optionally a different output field to write the results to.</p>
 <p>In the simplest usage: the following SPL will apply the &quot;toBase64&quot; operation to the &quot;inData&quot; field, and save the results back to the &quot;inData&quot; field (overwriting the original field).</p>
@@ -55,9 +52,10 @@
 <pre><code>[{&quot;op&quot;:&quot;From Base64&quot;,&quot;args&quot;:[&quot;A-Za-z0-9+/=&quot;,true]},{&quot;op&quot;:&quot;SHA3&quot;,&quot;args&quot;:[&quot;512&quot;]}]</code></pre>
 <p>Next: You need to convert this json string into a base64 encoded string (using CyberChef's toBase64 function in the GUI). This gives us the following string:</p>
 <pre><code>W3sib3AiOiJGcm9tIEJhc2U2NCIsImFyZ3MiOlsiQS1aYS16MC05Ky89Iix0cnVlXX0seyJvcCI6IlNIQTMiLCJhcmdzIjpbIjUxMiJdfV0=</code></pre>
-<p>that string is now the value for the <strong>b64recipe</strong> parameter:</p>
-<pre><code>... | cyberchef infield = &#39;inData&#39; b64recipe = &quot;W3sib3AiOiJGcm9tIEJhc2U2NCIsImFyZ3MiOlsiQS1aYS16MC05Ky89Iix0cnVlXX0seyJvcCI6IlNIQTMiLCJhcmdzIjpbIjUxMiJdfV0=&quot; |...</code></pre>
-<p>## <strong>savedRecipe</strong> parameter<br />If you find yourself using the same recipes over and over, you can save them in this App's &quot;./local/recipe&quot; folder with a nickname to easily reference them.</p>
+<p>that string is now the value for the <strong>encodedrecipe</strong> parameter:</p>
+<pre><code>... | cyberchef infield = &#39;inData&#39; encodedrecipe = &quot;W3sib3AiOiJGcm9tIEJhc2U2NCIsImFyZ3MiOlsiQS1aYS16MC05Ky89Iix0cnVlXX0seyJvcCI6IlNIQTMiLCJhcmdzIjpbIjUxMiJdfV0=&quot; |...</code></pre>
+<h2 id="savedRecipe-parameter"><strong>savedRecipe</strong> parameter</h2>
+<p>If you find yourself using the same recipes over and over, you can save them in this App's &quot;./local/recipe&quot; folder with a nickname to easily reference them.</p>
 <p>first create a <em>./local/recipe/myRecipes.txt</em> text file. In this file, add the following content:</p>
 <pre><code># Comment: the line below is a recipe you can reference from the CyberChef custom search command
 myComplexRecipe  :  [{&quot;op&quot;:&quot;SHA3&quot;,&quot;args&quot;:[&quot;512&quot;]}]
@@ -76,7 +74,7 @@ myComplexRecipe  :  [{&quot;op&quot;:&quot;SHA3&quot;,&quot;args&quot;:[&quot;51
 <p>For the <strong>encodedRecipe</strong> parameter, you don't need quotes (but they won't hurt).</p>
 <p>For the <strong>savedRecipe</strong> and <strong>command</strong> parameters, if the name is only alphanumeric (\w), you don't need quotes. If you have any other characters or spaces, you should enclose the string in single or double-quotes. The Pipe in the string must be escaped with a backslash.</p>
 <p>Basically: when in doubt, use single-quotes. Fieldnames need the single quote and pipe escaped with a backslash, and the command you use only needs the pipe escaped.</p>
-<p><strong>CyberChef Operation Names</strong><br />CyberChef is really flexible about how you specify the <strong>operation</strong> name with regard to case sensitivity and spaces. All of the following work fine when specifying the <strong>operation</strong>:<br />ToBase64, toBase64, tOBaSe64, &quot;to base 64&quot;, &quot;to Base64&quot;, &quot;toB ase 64&quot;. Essentially CyberChef ignores case and spaces when determining the command you want. If you include spaces, quote the operation. Don't include the parenthesis for the operation. Unfortunately you can't specify any parameters for the operation (use a recipe or b64recipe if you require that). This is due to a way that Splunk parses the SPL before sending it to the custom search command.</p>
+<p><strong>CyberChef Operation Names</strong><br />CyberChef is really flexible about how you specify the <strong>operation</strong> name with regard to case sensitivity and spaces. All of the following work fine when specifying the <strong>operation</strong>:<br />ToBase64, toBase64, tOBaSe64, &quot;to base 64&quot;, &quot;to Base64&quot;, &quot;toB ase 64&quot;. Essentially CyberChef ignores case and spaces when determining the command you want. If you include spaces, quote the operation. Don't include the parenthesis for the operation. Unfortunately you can't specify any parameters for the operation (use a recipe or encodedRecipe if you require that). This is due to a way that Splunk parses the SPL before sending it to the custom search command.</p>
 <p><strong>CyberChef Operations</strong><br />This App should support all CyberChef operations offered by the <a href="https://github.com/gchq/CyberChef/wiki/Node-API">CyberChef node.js API</a>, which exclude only a <a href="https://github.com/gchq/CyberChef/wiki/Node-API#excluded-operations">few commands</a>. This App uses Splunk's version of node (8.16), which isn't officially supported by CyberChef, but all the CyberChef unit tests passed, so there shouldn't be any problem running any of the supported CyberChef operations.</p>
 <p><strong>Performance:</strong>: While you could chain multiple CyberChef operations together like this:</p>
 <pre><code>... | cyberchef infield=&#39;x&#39; operation=&#39;fromBase64&quot; | cyberchef infield=&#39;x&#39; operation=&#39;SHA3&#39;  |  ...</code></pre>
@@ -88,8 +86,6 @@ myComplexRecipe  :  [{&quot;op&quot;:&quot;SHA3&quot;,&quot;args&quot;:[&quot;51
 . Please include as much information as possible with your request. This App is not professionally supported (it is a volunteer project), so issues may not be fixed immediately, but I will make every effort to reply.</p>
 <p>This app implements version 2 of Splunk's custom search protocol manually (since there's no SDK for node.js), which I had to reverse-engineer with limited documentation. Therefore, there are very likely some edge cases that you will run into that need to be fixed. Please submit them via Github with as much information as possible (that will allow me to easily re-create and fix the issue).</p>
 <p>Future releases of this App will focus on bug-fixes and performance (since it's not effectively leveraging node's asynchronous functionality effectively).</p>
-<h1 id="license">License</h1>
-<p>This App is released under the GPL v3 license. Please see the <a href="./LICENSE-GPL_v3">LICENSE</a> file. CyberChef is released under the <a href="./LICENSE-Apache_v2.0">Apache 2.0 License</a> and is covered by <a href="https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/">Crown Copyright</a>. This App has no affiliation with CyberChef or GCHQ, it merely implements their open-source software.</p>
 
       </html>
     </panel>
