@@ -85,9 +85,9 @@ Next: You need to convert this json string into a base64 encoded string (using C
 W3sib3AiOiJGcm9tIEJhc2U2NCIsImFyZ3MiOlsiQS1aYS16MC05Ky89Iix0cnVlXX0seyJvcCI6IlNIQTMiLCJhcmdzIjpbIjUxMiJdfV0=
 ```
 
-that string is now the value for the **b64recipe** parameter:
+that string is now the value for the **encodedRecipe** parameter:
 ```
-... | cyberchef infield = 'inData' b64recipe = "W3sib3AiOiJGcm9tIEJhc2U2NCIsImFyZ3MiOlsiQS1aYS16MC05Ky89Iix0cnVlXX0seyJvcCI6IlNIQTMiLCJhcmdzIjpbIjUxMiJdfV0=" |...
+... | cyberchef infield = 'inData' encodedrecipe = "W3sib3AiOiJGcm9tIEJhc2U2NCIsImFyZ3MiOlsiQS1aYS16MC05Ky89Iix0cnVlXX0seyJvcCI6IlNIQTMiLCJhcmdzIjpbIjUxMiJdfV0=" |...
 ```
 
  ## **savedRecipe** parameter
@@ -145,7 +145,7 @@ Basically: when in doubt, use single-quotes. Fieldnames need the single quote an
 
 **CyberChef Operation Names**
 CyberChef is really flexible about how you specify the **operation** name with regard to case sensitivity and spaces. All of the following work fine when specifying the **operation**:
-ToBase64, toBase64, tOBaSe64, "to base 64", "to Base64", "toB ase 64".  Essentially CyberChef ignores case and spaces when determining the command you want. If you include spaces, quote the operation. Don't include the parenthesis for the operation.  Unfortunately you can't specify any parameters for the operation (use a recipe or b64recipe if you require that). This is due to a way that Splunk parses the SPL before sending it to the custom search command. 
+ToBase64, toBase64, tOBaSe64, "to base 64", "to Base64", "toB ase 64".  Essentially CyberChef ignores case and spaces when determining the command you want. If you include spaces, quote the operation. Don't include the parenthesis for the operation.  Unfortunately you can't specify any parameters for the operation (use a recipe or encodedRecipe if you require that). This is due to a way that Splunk parses the SPL before sending it to the custom search command. 
 
 **CyberChef Operations**
 This App should support all CyberChef operations offered by the [CyberChef node.js API](https://github.com/gchq/CyberChef/wiki/Node-API), which exclude only a [few commands](https://github.com/gchq/CyberChef/wiki/Node-API#excluded-operations).  This App uses Splunk's version of node (8.16), which isn't officially supported by CyberChef, but all the CyberChef unit tests passed, so there shouldn't be any problem running any of the supported CyberChef operations.
