@@ -18,21 +18,25 @@ endef
 # Prepare a source folder to be turned into a spl file, do NOT remove the local directory
 define clean_src_folder
 # remove all hidden files and folders
-	find ./build -mindepth 1 -name '.*' -exec rm -rf {} \;
-	
+	#find ./build/${APPNAME}/ -mindepth 1 -name '.*' -exec rm -rf {} \;
+	 find ./build/${APPNAME}/ -mindepth 1 -name '.*' -exec rm -rf "{}" \;  || true
+	 
 # remove any files in metadata that aren't default.meta
-	rm -rf ./build/metadata/local.meta || true
+	rm -rf ./build/${APPNAME}/metadata/local.meta || true
 
 # all files should be 644, directories should be 755
 # http://dev.splunk.com/view/app-cert/SP-CAAAE3H
-	find ./build -type f -exec chmod 644 {} \;
-	find ./build -type d -exec chmod 755 {} \;
+	find ./build/${APPNAME} -type f -exec chmod 644 {} \;
+	find ./build/${APPNAME} -type d -exec chmod 755 {} \;
 
 # get rid of all .pyc files in bin (todo, not working)
 #find ./bin -type f -name '*.pyc' -delete 2>/dev/null
 
 # remove all temp files (ending with tilde)
 	find ./build -type f -name '*~' -exec rm -f '{}' \; 
+	
+# Remove swf file (so the app will pass appinspect)
+	rm ./build/${APPNAME}/bin/node_modules/node-forge/flash/swf/SocketPool.swf 
 endef
 
 # Build SPL file
