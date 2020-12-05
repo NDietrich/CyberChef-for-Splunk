@@ -181,4 +181,4 @@ This App is released under the GPL v3 license. Please see the [LICENSE](./LICENS
 
 # Binary File Declaration
 Splunk AppInspect reqiures the following statement:
-This app includes one webassembly (WASM) binary file: **bin/node_modules/tesseract.js-core/tesseract-core.wasm**. This file is installed as a part of the required [Tesseract](https://www.npmjs.com/package/tesseract) npm library. The source code for this binary file is included in the same directory (tesseract-core.wasm.js) along with compilation instructions (readme.md).
+This app includes one webassembly (WASM) binary file: **bin/node_modules/tesseract.js-core/tesseract-core.wasm**. This file is installed as a part of the required [Tesseract](https://www.npmjs.com/package/tesseract) npm library. The source code for this binary file is included in the same directory (tesseract-core.wasm.js) and instructions are in the README.md.txt file.
