@@ -34,9 +34,9 @@ In the simplest usage: the following SPL will apply the "toBase64" operation to 
 
 There are four ways to specify the CyberChef operation or recipe to use. You must choose one of these parameters:
 1. **operation**:  A single operation with no parameters.
-1. **jsonRecipe**: A recipe saved as compact json.
-1. **encodedRecipe**:  A recipe saved as compact json, then converted to base64.   
-1. **savedRecipe**:  A recipe in saved as compact json, saved to a text file located in this App's *./local/recipes/* folder.
+2. **jsonRecipe**: A recipe saved as compact json.
+3. **encodedRecipe**:  A recipe saved as compact json, then converted to base64.   
+4. **savedRecipe**:  A recipe in saved as compact json, saved to a text file located in this App's *./local/recipes/* folder.
 
 A CyberChef **operation** is a single function applied to the specified field for each event from your data. For example: converting data from a base64-encoded string using the *FromBase64* operation.
 
@@ -90,7 +90,7 @@ that string is now the value for the **encodedRecipe** parameter:
 ... | cyberchef infield = 'inData' encodedrecipe = "W3sib3AiOiJGcm9tIEJhc2U2NCIsImFyZ3MiOlsiQS1aYS16MC05Ky89Iix0cnVlXX0seyJvcCI6IlNIQTMiLCJhcmdzIjpbIjUxMiJdfV0=" |...
 ```
 
- ## **savedRecipe** parameter
+## **savedRecipe** parameter
 If you find yourself using the same recipes over and over, you can save them in this App's "./local/recipe" folder with a nickname to easily reference them. 
 
 first create a *./local/recipe/myRecipes.txt* text file.  In this file, add the following content:
@@ -121,18 +121,25 @@ See the [./default/recipes/READEME.txt](./default/recipes/READEME.txt) file incl
 
 ## **outfield** parameter
 This optional parameter specifies which field to write the results of the CyberChef operation or recipe to.  If you don't specify this field, then the results will be written back to the field specified by the **infield** parameter.  You can specify an existing or new field with this parameter. If the field already exists, the value will be overwritten with the results. If the field does not exist, it will be created in your results.  If CyberChef is not able to process the data in your infield (say you tried to apply an invalid operation to your data), the outfield will be blank for that event.
+```
+... | cyberchef infield='inData' outfield='modifiedData' operation="ToBase64" |...
+```
 
 ## **Debug** parameter
 This optional parameter can either be set to **full** for full debug information (including the contennt of messages passed between splunk and this app, including the data from your events), or to **info** for the same information, excluding the actual data sent and received.  The debug information is saved to a file named **cyberchef.log** in the search's dispatch directory.  If you have a problem and are requesting assitance, you'll probably want to include the debug log.
+```
+... | cyberchef infield='inData' debug=full operation="ToBase64" |...
+... | cyberchef infield='inData' debug=info outfield='modifiedData' operation="ToBase64" |...
+```
 
 # Important Notes
 **Parameter Ordering**
-You must start with the **infield** parameter, followed by the optional **outfield** and **debug** parameters. You must end with one of the four recipe/operation parameters listed above.  If you don't follow this order, you will get an error (this ordering makes it easier to Parse the SPL and minimizes the number of characters you need to escape in your SPL).
+You must start with the **infield** parameter, followed by the optional **outfield** and **debug** parameters. You must end with one of the four recipe/operation parameters listed above.  If you don't follow this order, you will get an error (this ordering makes it easier to parse the SPL and minimizes the number of characters you need to escape in your SPL).
 
 **Charsets, Quotes, and Escaped Characters**
 This command only supports the ASCII characterset in the SPL (but can support any Unicode characters in your data). What this means is that your fieldnames and your recipes must be ASCII chars; essentially if you type it in as SPL, it must be ASCII. If you have non-ASCII characters in your json or recipe, you can either use the **encodedreipce** or **savedrecipe** option to run the command. 
 
-This command should be able to handle most types of quotes for field names (infield and outfield).  If your field name only has alphanumeric characters (the \\w character set), you don't need to quote it, otherwise use single-quotes for your field names.  For fieldnames, you must escape the single-quote and the pipe character.  For example, if you have a field named ```a|b```, and you wanted to save the output to a field named ```b 'or' a```, your command would be:
+This command should be able to handle most types of quotes for field names (infield and outfield).  If your field name only has alphanumeric characters (the \\w character set), you don't need to quote it, otherwise use single-quotes for your field names.  For fieldnames, you must escape the single-quote and the pipe character.  For example, if you have a field named **a|b**, and you wanted to save the output to a field named **b 'or' a**, your command would be:
 ```
 ... | cyberchef infield='a\|b' outfield='b \'or\' a' ...
 ```
@@ -145,12 +152,15 @@ Basically: when in doubt, use single-quotes. Fieldnames need the single quote an
 
 **CyberChef Operation Names**
 CyberChef is really flexible about how you specify the **operation** name with regard to case sensitivity and spaces. All of the following work fine when specifying the **operation**:
-ToBase64, toBase64, tOBaSe64, "to base 64", "to Base64", "toB ase 64".  Essentially CyberChef ignores case and spaces when determining the command you want. If you include spaces, quote the operation. Don't include the parenthesis for the operation.  Unfortunately you can't specify any parameters for the operation (use a recipe or encodedRecipe if you require that). This is due to a way that Splunk parses the SPL before sending it to the custom search command. 
+
+ToBase64, toBase64, tOBaSe64, "to base 64", "to Base64", "toB ase 64".  
+
+Essentially CyberChef ignores case and spaces when determining the command you want. If you include spaces, quote the operation. Don't include the parenthesis for the operation.  Unfortunately you can't specify any parameters for the operation (use a recipe or encodedRecipe if you require that). This is due to a way that Splunk parses the SPL before sending it to the custom search command. 
 
 **CyberChef Operations**
 This App should support all CyberChef operations offered by the [CyberChef node.js API](https://github.com/gchq/CyberChef/wiki/Node-API), which exclude only a [few commands](https://github.com/gchq/CyberChef/wiki/Node-API#excluded-operations).  This App uses Splunk's version of node (8.16), which isn't officially supported by CyberChef, but all the CyberChef unit tests passed, so there shouldn't be any problem running any of the supported CyberChef operations.
 
-**Performance:**: While you could chain multiple CyberChef operations together like this:
+**Performance:** While you could chain multiple CyberChef operations together like this:
 ```
 ... | cyberchef infield='x' operation='fromBase64" | cyberchef infield='x' operation='SHA3'  |  ...
 ```
@@ -168,3 +178,7 @@ Future releases of this App will focus on bug-fixes and performance (since it's 
 
 # License
 This App is released under the GPL v3 license. Please see the [LICENSE](./LICENSE-GPL_v3) file.  CyberChef is released under the [Apache 2.0 License](./LICENSE-Apache_v2.0) and is covered by [Crown Copyright](https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/).  This App has no affiliation with CyberChef or GCHQ, it merely implements their open-source software. 
+
+# Binary File Declaration
+Splunk AppInspect reqiures the following statement:
+This app includes one webassembly (WASM) binary file: **bin/node_modules/tesseract.js-core/tesseract-core.wasm**. This file is installed as a part of the required [Tesseract](https://www.npmjs.com/package/tesseract) npm library. The source code for this binary file is included in the same directory (tesseract-core.wasm.js) along with compilation instructions (readme.md).
