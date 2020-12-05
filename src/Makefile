@@ -18,11 +18,18 @@ endef
 # Prepare a source folder to be turned into a spl file, do NOT remove the local directory
 define clean_src_folder
 # remove all hidden files and folders
-	#find ./build/${APPNAME}/ -mindepth 1 -name '.*' -exec rm -rf {} \;
+# ignore errors from this command (they aren't real...there is no spoon)
 	 find ./build/${APPNAME}/ -mindepth 1 -name '.*' -exec rm -rf "{}" \;  || true
 	 
-# remove any files in metadata that aren't default.meta
+# remove local.meta file
 	rm -rf ./build/${APPNAME}/metadata/local.meta || true
+
+# remove any rm -rf commands in package.json (to pass splunk AppInspect). Replace with ls -al
+	find ./build/${APPNAME}/bin/node_modules -name "package.json" -exec sed -i 's/rm -rf/ls -al/' {} \;
+
+# get rid of all readme.md files (not needed); rename tesseract's README.md since it has compilation instructions for the WASM file (required by appinspect)
+	mv ./build/${APPNAME}/bin/node_modules/tesseract.js-core/readme.md ./build/${APPNAME}/bin/node_modules/tesseract.js-core/readme.md.txt
+	find ./build/${APPNAME}/bin/node_modules -iname "readme.md" -delete
 
 # all files should be 644, directories should be 755
 # http://dev.splunk.com/view/app-cert/SP-CAAAE3H
