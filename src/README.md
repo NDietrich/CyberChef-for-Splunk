@@ -66,14 +66,12 @@ npm install
 # create html file 
 grunt prod	
 ```
-After this completes, the webpage (website actually) is located under **./build/prod/**, and can be launched by opening **./build/prod/index.html**.  Thie prod folder also includes a zip file of the entire website.
 
-```
-and you need to add this line at the top of the CyberChef.html file for it to launch within Splunk Web:
+After this completes, the webpage (website actually) is located under **./build/prod/**, and can be launched by opening **./build/prod/index.html**.  Thie prod folder also includes a zip file of the entire website.  You need to add this line at the top of the CyberChef.html file for it to launch within Splunk Web:
 ```
 <script src="../../js/i18n.js" />
-
 ```
+
 Copy the contents of the **prod** folder (except the zip file) to this app's **./appserver/static** folder, and reference it in this apps **/default/data/ui/nav/default.xml** file as follows:
 ```
 ...
@@ -96,7 +94,6 @@ grunt test
 
 Test that CyberChef Node API works:
 ```
-
 test:
 // app.js
 const chef = require("cyberchef");
@@ -105,8 +102,6 @@ console.log(chef.fromBase64("U28gbG9uZyBhbmQgdGhhbmtzIGZvciBhbGwgdGhlIGZpc2gu"))
 
 // node app.js
 // => "So long and thanks for all the fish."
-
-
 ```
 
 
