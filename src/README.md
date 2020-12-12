@@ -104,6 +104,29 @@ console.log(chef.fromBase64("U28gbG9uZyBhbmQgdGhhbmtzIGZvciBhbGwgdGhlIGZpc2gu"))
 // => "So long and thanks for all the fish."
 ```
 
+# Testing CyberChef without Grunt
+you can test cyberchef by running the following commands (taken from the gruntfile), you're probably using the latest version of NPM and node (not splunk's older version, but that's ok):
+```
+npm install cyberchef
+npm install cyberchef --only=dev
+npm install cli-progress
+
+cd node_modules/cyberchef/
+
+node --experimental-modules --no-warnings --no-deprecation tests/node/index.mjs && node --experimental-modules --no-warnings --no-deprecation tests/operations/index.mjs
+```
+
+and then to test with Splunk's version of Node:
+```
+source /opt/splunk/bin/setSplunkEnv
+node -v
+     v8.17.0
+which node
+     /opt/splunk/bin/node
+
+node --experimental-modules --no-warnings --no-deprecation tests/node/index.mjs && node --experimental-modules --no-warnings --no-deprecation tests/operations/index.mjs
+
+```
 
 
 ## Nearley Grammar
