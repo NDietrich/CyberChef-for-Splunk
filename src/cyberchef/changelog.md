@@ -1,5 +1,9 @@
 # ChangeLog
 
+## v1.0.2
+Released xxxx-xx-xx
+- Total re-write of message passing functionality (much simplified, less bugs)
+
 ## v1.0.1
 Released 2020-12-05
 - Bug and Documentation Fixes
