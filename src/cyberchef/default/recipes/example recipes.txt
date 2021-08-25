@@ -16,3 +16,7 @@ example_xml_moorse	: [{"op":"To Base64","args":["A-Za-z0-9_."]},{"op":"To Morse 
 # use as follows:  
 #  ... | cyberchef infield='blah' recipe='example_moorse' | ...
 example_moorse	: [{"op":"To Morse Code","args":["-/.","Space","Line feed"]}]
+
+# EXAMPLE 3
+# simple tobase64
+tobase64 : [{"op":"To Base64","args":["A-Za-z0-9+/="]}]
