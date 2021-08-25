@@ -22,7 +22,7 @@ Here we generate three results with random data in the *'data'* field (the first
 # Installation
 You should install this App on all your Splunk Indexers and Search Heads (there is no benefit or harm to installing it on any forwarders).  You must reboot Splunk after installation. No configuration is required to use this App.
 
-This App runs on Windows and Linux, and works with Splunk versions 7.3 - 8.1.
+This App runs on Windows and Linux, and works with Splunk versions 7.3 - 8.2.
 
 # Usage
 This App will allow you to apply CyberChef operations and recipes through a custom search command named **cyberchef**.  This custom search command requires that you specify the input field to operate on, the CyberChef operation or recipe to apply to the data in that field, and optionally a different output field to write the results to.
@@ -102,17 +102,17 @@ myComplexRecipe  :  [{"op":"SHA3","args":["512"]}]
 
 You don't need to reboot Splunk to use these recipes, but you need to make sure the recipe is avaliable on all your Splunk servers. Run the following SPL to reference this recipe:
 ```
-... | cyberchef infield = 'inData' recipe = "myComplexRecipe" |...
+... | cyberchef infield = 'inData' savedRecipe = "myComplexRecipe" |...
 ```
 
 To test this, I have made two savedRecipe examples avaliable. The First coverts the event to moorse code:
 ```
-... | cyberchef infield='inData' recipe=example_moorse  |...
+... | cyberchef infield='inData' savedRecipe=example_moorse  |...
 ```
 
 the second example converts the event to to base64, then to moorse code:
 ```
-... | cyberchef infield='inData' recipe=example_xml_moorse  |...
+... | cyberchef infield='inData' savedRecipe=example_xml_moorse  |...
 ```
 
 You can have as many text files you want, with as many saved recipes as you want.  This App will parse all text files in the *./local/recipe/* folder for recipes.  The first matching recipe name will be used.
@@ -165,6 +165,8 @@ This App should support all CyberChef operations offered by the [CyberChef node.
 ... | cyberchef infield='x' operation='fromBase64" | cyberchef infield='x' operation='SHA3'  |  ...
 ```
 You should avoid this when possible since there is a performance impact. Each time you run the cyberchef custom search command: there is a delay as the libraries are loaded (twice in the above example).  It will be much more efficent to use one of the other **recipe** parameters rather than the **operation** parameter multiple times.  Once the CyberChef libraries are loaded for a command, the processing tends to be relatively fast.
+
+This Custom Search Command is a distributed streaming command, so you can realize performance benefits across larger datasets if you try to run it early in your search pipeline (before you run any SPL commands that aren't distributed). 
 
 # CyberChef Web GUI
 This App provides a local version of the CyberChef Web GUI. It can be found by opening the App in Splunk Web, and clicking the link in the Nav Bar for CyberChef.
