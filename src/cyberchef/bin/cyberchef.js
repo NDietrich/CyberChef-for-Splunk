@@ -54,10 +54,10 @@ var transform	= null
 * 			Global Variables
 ******************************************************************************/
 
-var logfile = 'c:\\temp\\debug.log'				// logfile location, defaults to dispatch_dir if not set explicity
-//const logFullMessages = false	// output the data read from stdin and written to stdout	
-var tempLogString	= ''		// string to hold logged messages until we determine if we're in debug mode
+var logfile = ''	// logfile location, defaults to dispatch_dir if not set explicity
+					// If you're testing, set to a static path (c:\\debug.log or /tmp/debug.log)
 
+var tempLogString	= ''		// string to hold logged messages until we determine if we're in debug mode
 
 var searchOptions = null	// all the info from the getinfo json metatdata as a object
 var message = null			// holds the received message (metadata and payload, not the header)
