@@ -61,7 +61,7 @@
 myComplexRecipe  :  [{&quot;op&quot;:&quot;SHA3&quot;,&quot;args&quot;:[&quot;512&quot;]}]
 </code></pre>
 <p>You don't need to reboot Splunk to use these recipes, but you need to make sure the recipe is avaliable on all your Splunk servers. Run the following SPL to reference this recipe:</p>
-<pre><code>... | cyberchef infield = &#39;inData&#39; recipe = &quot;myComplexRecipe&quot; |...</code></pre>
+<pre><code>... | cyberchef infield = &#39;inData&#39; savedRecipe = &quot;myComplexRecipe&quot; |...</code></pre>
 <p>See the <a href="./default/recipes/READEME.txt">./default/recipes/READEME.txt</a> file included with this App for more details.</p>
 <h2 id="outfield-parameter"><strong>outfield</strong> parameter</h2>
 <p>This optional parameter specifies which field to write the results of the CyberChef operation or recipe to. If you don't specify this field, then the results will be written back to the field specified by the <strong>infield</strong> parameter. You can specify an existing or new field with this parameter. If the field already exists, the value will be overwritten with the results. If the field does not exist, it will be created in your results. If CyberChef is not able to process the data in your infield (say you tried to apply an invalid operation to your data), the outfield will be blank for that event.</p>
