@@ -485,7 +485,7 @@ process.stdin.on('readable', () => {
 
 		// if we have a valid SID (nnnnnnnnnn.n+) and logfile is empty (not explicity set for testing), start logging there
 		if (logfile == '' && searchOptions.searchinfo.sid.match(/^\d{10}\.\d+$/)){
-			logfile = searchOptions.searchinfo.dispatch_dir + "\\debug.log"
+			logfile = searchOptions.searchinfo.dispatch_dir + "/debug.log"
 
 			// log a few extra things if we're starting up logging now
 			log("dispatch_dir identifed, starting logging to: " + logfile)
