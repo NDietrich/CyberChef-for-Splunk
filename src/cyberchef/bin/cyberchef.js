@@ -357,47 +357,60 @@ const loadRecipesFromFile = function( recipeAliasToLoad ) {
 
 	log("entering function loadRecipesFromFile, looking for: " + recipeAliasToLoad)
 
-	const recipeFolders = ['..//local//recipes//', '..//default//recipes//' ]
+	const recipeFolders = ['../local/recipes', '../default/recipes' ]
 
 	var filenames = []
 	for(var i=0; i < recipeFolders.length; i++) {
 		try {
 			var f = fs.readdirSync(recipeFolders[i] )
 			for (var j = 0; j < f.length; j++ ){
-				f[j] = __dirname + '\\' + recipeFolders[i] + '\\' +  f[j]
+				f[j] = __dirname + '/' + recipeFolders[i] + '/' +  f[j]
 			}
 			filenames = filenames.concat(f)
 		} catch (err) {}
 	}
 
-	for(var i = 0; i < filenames.length; i++)
-	{
-		var file = filenames[i]
-		if(! file.endsWith("README")  ){ 
-			try {
-				var content = fs.readFileSync( file, 'UTF-8')
-			} catch(err) {
-				// do nothing
-			}
-			
-			if(content.length != 0){
-				line = content.split(/\r?\n/);
+	log("checking filenames: \n\t" + filenames.join("\n\t") + "\n")
 
-				for(var i = 0; i< line.length; i++){
-					// does the line start with a \w char (otherwise its a comment)
-					if(line[i].charAt(0).search(/\W/i)) {
-						// split the line at the first colon found, left side is the nickname, right side is the json recipe
-						var recipeName = line[i].substr(0,line[i].indexOf(':')).trim()
-						var recipeCode = line[i].substr(line[i].indexOf(':')+1).trim()
-						log("Checking " + recipeName + " against " + recipeAliasToLoad)
-						if (recipeName == recipeAliasToLoad) {
-							return recipeCode
-						}
-						
-					}
+
+	for(var j = 0; j < filenames.length; j++)
+	{
+		
+		var file = filenames[j]
+		log ("Checking " + j + " of " + filenames.length + ": " + file )
+		if (file.endsWith("README.txt")){ continue }
+
+		log("\t Checking content of file: " + file)
+		try {
+			var content = fs.readFileSync( file, 'UTF-8')
+		} catch(err) {
+			// do nothing
+		}
+
+		if(content.length == 0) {continue}
+		
+		// split the content of the file by lines
+		line = content.split(/\r?\n/);
+
+		// iterate over each line, looking for valid key:value pairs, and then match key
+		for(var i = 0; i< line.length; i++){
+			//if(! line.includes(":")) {continue}
+
+			// does the line start with a \w char (otherwise its a comment)
+			if( (line[i].charAt(0).search(/\W/i)) )   {
+				
+				// split the line at the first colon found, left side is the nickname, right side is the json recipe
+				var recipeName = line[i].substr(0,line[i].indexOf(':')).trim()
+				var recipeCode = line[i].substr(line[i].indexOf(':')+1).trim()
+				log("Checking " + recipeName + " against " + recipeAliasToLoad)
+				if (recipeName == recipeAliasToLoad) {
+					return recipeCode
 				}
+				
 			}
 		}
+		
+		
 		
 	}
 
