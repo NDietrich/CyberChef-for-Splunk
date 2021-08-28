@@ -24,16 +24,58 @@ CyberChef is used two ways in this app:
 
 ## Steps to install the correct node packages
 This App uses four npm packages, which are listed in the **./bin/packages.json** file:
-```
+```javascript
 	"dependencies": {
-		"cyberchef": "^9.21.0",
+		"cyberchef": "^9.32.2",
 		"csv-parse": "^4.14.1",
-		"csv-stringify": "^5.4.0",
+		"csv-stringify": "~5.4.0",
 		"stream-transform": "^2.0.3",
 		"nearley": "^2.19.9"
 	}
 ```
-if you delete **./bin/node_modules** folder, just run **npm install** from the **./bin** folder to install these files. use the Makefile (build spl command) to clean up the build folder before use.
+
+## Building CyberChef
+There is currently a bug with CyberChef [#1166](https://github.com/gchq/CyberChef/issues/1166) and [#1227](https://github.com/gchq/CyberChef/issues/1127) which prevent `npm install` from working.
+
+To download CyberChef and integrate it into this app, the instructions are a bit convoluted.  As done on a windows box:
+1. Install node **10.21.1** to `c:\node-v10.24.1-win-x64` (grunt-cli requires node 10).
+2. update your `path`
+3. install grunt-cli
+4. Git-clone CyberChef
+
+```javascript
+set PATH=c:\node-v10.24.1-win-x64;%PATH%
+mkdir c:\cyberchef-testing
+cd c:\cyberchef-testing
+npm install -g grunt-cli
+git clone https://github.com/gchq/CyberChef.git
+```
+
+Now we have to edit `Gruntfile.js` in the cyberchef folder, and comment out everyting for the `fixCryptoApiImports` command. It should look like this:
+```javascript
+fixCryptoApiImports: {
+	command: [
+		"echo '\n--- SKIPPING BAD CODE ---'"
+	].join(" "),
+	stdout: false
+```
+now we need to build cyberchef's node api files and copy them to our CyberCheff Splunk Add-On
+```
+cd c:\cyberchef-testing\CyberChef
+grunt node
+rmdir "c:\Program Files\Splunk\etc\apps\cyberchef\bin\node_modules\cyberchef"
+copy c:\cyberchef-testing\CyberChef\ "c:\Program Files\Splunk\etc\apps\cyberchef\bin\node_modules\"
+```
+
+Next we need to run `npm install` for our Add-on, which will move the node_modules from the cyberchef\node_modules folder up to the proper location:
+```
+cd "c:\Program Files\Splunk\etc\apps\cyberchef\bin\"
+npm install
+```
+
+
+## the old way of installing (when the bugs above are fixed):
+If you delete **./bin/node_modules** folder, just run **npm install** from the **./bin** folder to install these files. use the Makefile (build spl command) to clean up the build folder before use.
 
 ## testing with Splunk's AppInspect:
 instructions for validating the .spl file on an Ubuntu 20 system:
@@ -56,11 +98,12 @@ splunk-appinspect inspect cyberchef.spl --mode test --included-tags cloud
 
 
 # Building the CyberChef Web Page
+(must be done on linux, due to line-endings)
 ```
+npm install grunt-cli -g
+
 git clone https://github.com/gchq/CyberChef.git
 cd CyberChef
-npm install grunt-cli
-
 npm install
 
 # create html file 
@@ -82,55 +125,9 @@ Copy the contents of the **prod** folder (except the zip file) to this app's **.
 ...
 ```
 
-Optional (not used in this app): create node module manually.  Compiles in place (not in prod)
-```
-grunt node
-
-# and test the node file using splunk's enviornment and node interpreter
-source /opt/splunk/bin/setSplunkEnv
-grunt test
-
-```
-
-Test that CyberChef Node API works:
-```
-test:
-// app.js
-const chef = require("cyberchef");
-
-console.log(chef.fromBase64("U28gbG9uZyBhbmQgdGhhbmtzIGZvciBhbGwgdGhlIGZpc2gu"));
-
-// node app.js
-// => "So long and thanks for all the fish."
-```
-
-# Testing CyberChef without Grunt
-you can test cyberchef by running the following commands (taken from the gruntfile), you're probably using the latest version of NPM and node (not splunk's older version, but that's ok):
-```
-npm install cyberchef
-npm install cyberchef --only=dev
-npm install cli-progress
-
-cd node_modules/cyberchef/
-
-node --experimental-modules --no-warnings --no-deprecation tests/node/index.mjs && node --experimental-modules --no-warnings --no-deprecation tests/operations/index.mjs
-```
-
-and then to test with Splunk's version of Node:
-```
-source /opt/splunk/bin/setSplunkEnv
-node -v
-     v8.17.0
-which node
-     /opt/splunk/bin/node
-
-node --experimental-modules --no-warnings --no-deprecation tests/node/index.mjs && node --experimental-modules --no-warnings --no-deprecation tests/operations/index.mjs
-
-```
-
 
 ## Nearley Grammar
-To compile the .js file from the nearly grammar:
+The [nearley](https://nearley.js.org/) grammar is used to parse the SPL args for the cyberchef custom search command that are passed by Splunk to the command.  To compile the .js file from the nearly grammar:
 
 ```
 node.exe nearleyc.js grammar.ne -o grammar.js
