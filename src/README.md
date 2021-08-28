@@ -37,18 +37,14 @@ This App uses four npm packages, which are listed in the **./bin/packages.json**
 ## Building CyberChef
 There is currently a bug with CyberChef [#1166](https://github.com/gchq/CyberChef/issues/1166) and [#1227](https://github.com/gchq/CyberChef/issues/1127) which prevent `npm install` from working.
 
-To download CyberChef and integrate it into this app, the instructions are a bit convoluted.  As done on a windows box:
-1. Install node **10.21.1** to `c:\node-v10.24.1-win-x64` (grunt-cli requires node 10).
-2. update your `path`
-3. install grunt-cli
-4. Git-clone CyberChef
+To download CyberChef and integrate it into this app, the instructions are a bit convoluted. :
+```bash
+// running node v10.19.0
+sudo npm install -g grunt-cli grunt
 
-```javascript
-set PATH=c:\node-v10.24.1-win-x64;%PATH%
-mkdir c:\cyberchef-testing
-cd c:\cyberchef-testing
-npm install -g grunt-cli
+mkdir ~/cyberchef-test
 git clone https://github.com/gchq/CyberChef.git
+mv CyberChef cyberchef
 ```
 
 Now we have to edit `Gruntfile.js` in the cyberchef folder, and comment out everyting for the `fixCryptoApiImports` command. It should look like this:
@@ -59,19 +55,60 @@ fixCryptoApiImports: {
 	].join(" "),
 	stdout: false
 ```
+
 now we need to build cyberchef's node api files and copy them to our CyberCheff Splunk Add-On
 ```
-cd c:\cyberchef-testing\CyberChef
+# cleanup, remove .git and .gitignre folders
+cd ~/cyberchef-test/cyberchef
+rm -rf .git*
+rm package-lock.json
+
+# install grunt-cli locally (not sure why)
+cd ~/cyberchef-test/cyberchef
+npm install grunt-cli grunt
+
+# build node modules
+cd ~/cyberchef-test/cyberchef
 grunt node
-rmdir "c:\Program Files\Splunk\etc\apps\cyberchef\bin\node_modules\cyberchef"
-copy c:\cyberchef-testing\CyberChef\ "c:\Program Files\Splunk\etc\apps\cyberchef\bin\node_modules\"
+```
+add package.json (for this Add-on, including cyberchef, nearly, csv-parse...)
+```json
+...
+	"dependencies": {
+		"cyberchef": "^9.32.2",
+		"csv-parse": "^4.14.1",
+		"csv-stringify": "~5.4.0",
+		"stream-transform": "^2.0.3",
+		"nearley": "^2.19.9"
+	}
 ```
 
-Next we need to run `npm install` for our Add-on, which will move the node_modules from the cyberchef\node_modules folder up to the proper location:
+install all required libraries and clean up:
 ```
-cd "c:\Program Files\Splunk\etc\apps\cyberchef\bin\"
+cd ~/cyberchef-test/
+rm ~/cyberchef-test/cyberchef/package-lock.json
+mkdir node_modules
+
+npm install grunt-cli grunt webpack
+npm install ./cyberchef
 npm install
+npm dedupe
+npm install
+npm prune 
 ```
+
+finally test your install. Create a test.js file in the ~/cyberchef-test folder, with the follwoing content
+```javascript
+const chef = require("cyberchef");
+console.log(chef.fromBase64("U28gbG9uZyBhbmQgdGhhbmtzIGZvciBhbGwgdGhlIGZpc2gu"));
+//output will be "So long and thanks for all the fish."
+```
+
+and run it:
+```bash
+node test.js
+```
+
 
 
 ## the old way of installing (when the bugs above are fixed):
