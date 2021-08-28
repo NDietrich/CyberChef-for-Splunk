@@ -305,7 +305,7 @@ const log = function(msg){
 */
 const halt_on_error = function (msg){
 
-	log("halt_on_error: " + msg + "\n\n")
+	log("halt_on_error: " + msg )
 	// Remove all newlines, backslashes, and double-quotes from 'msg'
 	msg = msg.replace(/(\r\n|\n|\r|\u0d0a)/gm," ")
 	msg = msg.replace(/\\/g, "\\\\");
@@ -315,22 +315,27 @@ const halt_on_error = function (msg){
 	const transportHeader = 'chunked 1.0,' + metadata.length + ",0\n"
 	process.stdout.write(transportHeader + metadata)
 
+	// sleep until splunk kills us
+	const seconds = 10
+	var waitTill = new Date(new Date().getTime() + seconds * 1000);
+	while(waitTill > new Date()){}
+
 }
 
 /*************************************************
-* 
-*	
+* 	load (slow to load) modules
+*	make async so we don't have problems
 *
 * 
 */
 const load_modules = function(){
 	log("loading Modules....")
-	
-	log("\tcyberchef as chef")
-	try {	
+		
+	try {		
+		log("\tcyberchef as chef")
 		chef = require("cyberchef")
 	} catch (err) {
-		halt_on_error("Error loading required module Cyberchef " + err.message + ", " + err.name)
+		halt_on_error("Error loading required module Cyberchef: " + err)
 	}
 
 	try {
@@ -341,7 +346,7 @@ const load_modules = function(){
 		log("\tstream-transform as transform")
 		transform = require('stream-transform/lib/sync')
 	} catch (err) {
-		halt_on_error("Error loading required module (one of the csv modules) " + err.message + ", " + err.name)
+		halt_on_error("Error loading required module (one of the csv modules): " + err)
 	}
 	log("All modules loaded without error.")
 
