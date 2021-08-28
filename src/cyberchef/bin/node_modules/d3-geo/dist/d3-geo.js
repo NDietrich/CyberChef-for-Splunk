@@ -1,50 +1,9 @@
-// https://d3js.org/d3-geo/ v1.12.1 Copyright 2020 Mike Bostock
+// https://d3js.org/d3-geo/ v2.0.2 Copyright 2021 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-array')) :
 typeof define === 'function' && define.amd ? define(['exports', 'd3-array'], factory) :
 (global = global || self, factory(global.d3 = global.d3 || {}, global.d3));
-}(this, (function (exports, d3Array) { 'use strict';
-
-// Adds floating point numbers with twice the normal precision.
-// Reference: J. R. Shewchuk, Adaptive Precision Floating-Point Arithmetic and
-// Fast Robust Geometric Predicates, Discrete & Computational Geometry 18(3)
-// 305–363 (1997).
-// Code adapted from GeographicLib by Charles F. F. Karney,
-// http://geographiclib.sourceforge.net/
-
-function adder() {
-  return new Adder;
-}
-
-function Adder() {
-  this.reset();
-}
-
-Adder.prototype = {
-  constructor: Adder,
-  reset: function() {
-    this.s = // rounded value
-    this.t = 0; // exact error
-  },
-  add: function(y) {
-    add(temp, y, this.t);
-    add(this, temp.s, this.s);
-    if (this.s) this.t += temp.t;
-    else this.s = temp.t;
-  },
-  valueOf: function() {
-    return this.s;
-  }
-};
-
-var temp = new Adder;
-
-function add(adder, a, b) {
-  var x = adder.s = a + b,
-      bv = x - a,
-      av = x - bv;
-  adder.t = (a - av) + (b - bv);
-}
+}(this, function (exports, d3Array) { 'use strict';
 
 var epsilon = 1e-6;
 var epsilon2 = 1e-12;
@@ -62,6 +21,7 @@ var atan2 = Math.atan2;
 var cos = Math.cos;
 var ceil = Math.ceil;
 var exp = Math.exp;
+var hypot = Math.hypot;
 var log = Math.log;
 var pow = Math.pow;
 var sin = Math.sin;
@@ -153,9 +113,11 @@ function geoStream(object, stream) {
   }
 }
 
-var areaRingSum = adder();
+var areaRingSum = new d3Array.Adder();
 
-var areaSum = adder(),
+// hello?
+
+var areaSum = new d3Array.Adder(),
     lambda00,
     phi00,
     lambda0,
@@ -167,7 +129,7 @@ var areaStream = {
   lineStart: noop,
   lineEnd: noop,
   polygonStart: function() {
-    areaRingSum.reset();
+    areaRingSum = new d3Array.Adder();
     areaStream.lineStart = areaRingStart;
     areaStream.lineEnd = areaRingEnd;
   },
@@ -218,7 +180,7 @@ function areaPoint(lambda, phi) {
 }
 
 function area(object) {
-  areaSum.reset();
+  areaSum = new d3Array.Adder();
   geoStream(object, areaStream);
   return areaSum * 2;
 }
@@ -259,7 +221,7 @@ var lambda0$1, phi0, lambda1, phi1, // bounds
     lambda2, // previous lambda-coordinate
     lambda00$1, phi00$1, // first point
     p0, // previous 3D point
-    deltaSum = adder(),
+    deltaSum,
     ranges,
     range;
 
@@ -271,7 +233,7 @@ var boundsStream = {
     boundsStream.point = boundsRingPoint;
     boundsStream.lineStart = boundsRingStart;
     boundsStream.lineEnd = boundsRingEnd;
-    deltaSum.reset();
+    deltaSum = new d3Array.Adder();
     areaStream.polygonStart();
   },
   polygonEnd: function() {
@@ -528,12 +490,12 @@ function centroidRingPoint(lambda, phi) {
       cx = y0 * z - z0 * y,
       cy = z0 * x - x0 * z,
       cz = x0 * y - y0 * x,
-      m = sqrt(cx * cx + cy * cy + cz * cz),
+      m = hypot(cx, cy, cz),
       w = asin(m), // line weight = angle
       v = m && -w / m; // area weight multiplier
-  X2 += v * cx;
-  Y2 += v * cy;
-  Z2 += v * cz;
+  X2.add(v * cx);
+  Y2.add(v * cy);
+  Z2.add(v * cz);
   W1 += w;
   X1 += w * (x0 + (x0 = x));
   Y1 += w * (y0 + (y0 = y));
@@ -544,26 +506,28 @@ function centroidRingPoint(lambda, phi) {
 function centroid(object) {
   W0 = W1 =
   X0 = Y0 = Z0 =
-  X1 = Y1 = Z1 =
-  X2 = Y2 = Z2 = 0;
+  X1 = Y1 = Z1 = 0;
+  X2 = new d3Array.Adder();
+  Y2 = new d3Array.Adder();
+  Z2 = new d3Array.Adder();
   geoStream(object, centroidStream);
 
-  var x = X2,
-      y = Y2,
-      z = Z2,
-      m = x * x + y * y + z * z;
+  var x = +X2,
+      y = +Y2,
+      z = +Z2,
+      m = hypot(x, y, z);
 
   // If the area-weighted ccentroid is undefined, fall back to length-weighted ccentroid.
   if (m < epsilon2) {
     x = X1, y = Y1, z = Z1;
     // If the feature has zero length, fall back to arithmetic mean of point vectors.
     if (W1 < epsilon) x = X0, y = Y0, z = Z0;
-    m = x * x + y * y + z * z;
+    m = hypot(x, y, z);
     // If the feature still has an undefined ccentroid, then return.
     if (m < epsilon2) return [NaN, NaN];
   }
 
-  return [atan2(y, x) * degrees, asin(z / sqrt(m)) * degrees];
+  return [atan2(y, x) * degrees, asin(z / m) * degrees];
 }
 
 function constant(x) {
@@ -855,8 +819,6 @@ function link(array) {
   b.p = a;
 }
 
-var sum = adder();
-
 function longitude(point) {
   if (abs(point[0]) <= pi)
     return point[0];
@@ -872,7 +834,7 @@ function polygonContains(polygon, point) {
       angle = 0,
       winding = 0;
 
-  sum.reset();
+  var sum = new d3Array.Adder();
 
   if (sinPhi === 1) phi = halfPi + epsilon;
   else if (sinPhi === -1) phi = -halfPi - epsilon;
@@ -928,7 +890,7 @@ function polygonContains(polygon, point) {
   // from the point to the South pole.  If it is zero, then the point is the
   // same side as the South pole.
 
-  return (angle < -epsilon || angle < epsilon && sum < -epsilon) ^ (winding & 1);
+  return (angle < -epsilon || angle < epsilon && sum < -epsilon2) ^ (winding & 1);
 }
 
 function clip(pointVisible, clipLine, interpolate, start) {
@@ -1561,7 +1523,7 @@ function extent() {
   };
 }
 
-var lengthSum = adder(),
+var lengthSum,
     lambda0$2,
     sinPhi0$1,
     cosPhi0$1;
@@ -1605,7 +1567,7 @@ function lengthPoint(lambda, phi) {
 }
 
 function length(object) {
-  lengthSum.reset();
+  lengthSum = new d3Array.Adder();
   geoStream(object, lengthStream);
   return +lengthSum;
 }
@@ -1851,12 +1813,10 @@ function interpolate(a, b) {
   return interpolate;
 }
 
-function identity(x) {
-  return x;
-}
+var identity = x => x;
 
-var areaSum$1 = adder(),
-    areaRingSum$1 = adder(),
+var areaSum$1 = new d3Array.Adder(),
+    areaRingSum$1 = new d3Array.Adder(),
     x00,
     y00,
     x0$1,
@@ -1873,11 +1833,11 @@ var areaStream$1 = {
   polygonEnd: function() {
     areaStream$1.lineStart = areaStream$1.lineEnd = areaStream$1.point = noop;
     areaSum$1.add(abs(areaRingSum$1));
-    areaRingSum$1.reset();
+    areaRingSum$1 = new d3Array.Adder();
   },
   result: function() {
     var area = areaSum$1 / 2;
-    areaSum$1.reset();
+    areaSum$1 = new d3Array.Adder();
     return area;
   }
 };
@@ -2065,7 +2025,7 @@ PathContext.prototype = {
   result: noop
 };
 
-var lengthSum$1 = adder(),
+var lengthSum$1 = new d3Array.Adder(),
     lengthRing,
     x00$2,
     y00$2,
@@ -2089,7 +2049,7 @@ var lengthStream$1 = {
   },
   result: function() {
     var length = +lengthSum$1;
-    lengthSum$1.reset();
+    lengthSum$1 = new d3Array.Adder();
     return length;
   }
 };
@@ -2416,6 +2376,7 @@ function scaleTranslate(k, dx, dy, sx, sy) {
 }
 
 function scaleTranslateRotate(k, dx, dy, sx, sy, alpha) {
+  if (!alpha) return scaleTranslate(k, dx, dy, sx, sy);
   var cosAlpha = cos(alpha),
       sinAlpha = sin(alpha),
       a = cosAlpha * k,
@@ -2535,7 +2496,7 @@ function projectionMutator(projectAt) {
 
   function recenter() {
     var center = scaleTranslateRotate(k, 0, 0, sx, sy, alpha).apply(null, project(lambda, phi)),
-        transform = (alpha ? scaleTranslateRotate : scaleTranslate)(k, x - center[0], y - center[1], sx, sy, alpha);
+        transform = scaleTranslateRotate(k, x - center[0], y - center[1], sx, sy, alpha);
     rotate = rotateRadians(deltaLambda, deltaPhi, deltaGamma);
     projectTransform = compose(project, transform);
     projectRotateTransform = compose(rotate, projectTransform);
@@ -2733,6 +2694,7 @@ function azimuthalRaw(scale) {
     var cx = cos(x),
         cy = cos(y),
         k = scale(cx * cy);
+        if (k === Infinity) return [2, 0];
     return [
       k * cy * sin(x),
       k * sin(y)
@@ -3162,4 +3124,4 @@ exports.geoTransverseMercatorRaw = transverseMercatorRaw;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));

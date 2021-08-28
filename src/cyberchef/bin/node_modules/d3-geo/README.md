@@ -22,11 +22,11 @@ D3 uses [GeoJSON](http://geojson.org/geojson-spec.html) to represent geographic 
 
 ## Installing
 
-If you use NPM, `npm install d3-geo`. Otherwise, download the [latest release](https://github.com/d3/d3-geo/releases/latest). You can also load directly from [d3js.org](https://d3js.org), either as a [standalone library](https://d3js.org/d3-geo.v1.min.js) or as part of [D3](https://github.com/d3/d3). AMD, CommonJS, and vanilla environments are supported. In vanilla, a `d3` global is exported:
+If you use NPM, `npm install d3-geo`. Otherwise, download the [latest release](https://github.com/d3/d3-geo/releases/latest). You can also load directly from [d3js.org](https://d3js.org), either as a [standalone library](https://d3js.org/d3-geo.v2.min.js) or as part of [D3](https://github.com/d3/d3). AMD, CommonJS, and vanilla environments are supported. In vanilla, a `d3` global is exported:
 
 ```html
-<script src="https://d3js.org/d3-array.v1.min.js"></script>
-<script src="https://d3js.org/d3-geo.v1.min.js"></script>
+<script src="https://d3js.org/d3-array.v2.min.js"></script>
+<script src="https://d3js.org/d3-geo.v2.min.js"></script>
 <script>
 
 var projection = d3.geoEqualEarth(),
@@ -297,7 +297,7 @@ This is a U.S.-centric composite projection of three [d3.geoConicEqualArea](#geo
 
 [<img src="https://raw.githubusercontent.com/d3/d3-geo/master/img/albersUsa-parameters.png" width="480" height="250">](https://bl.ocks.org/Fil/7723167596af40d9159be34ffbf8d36b)
 
-See [d3-composite-projections](http://geoexamples.com/d3-composite-projections/) for more examples.
+See [Albers USA with Territories](https://www.npmjs.com/package/geo-albers-usa-territories) for an extension to all US territories, and [d3-composite-projections](http://geoexamples.com/d3-composite-projections/) for more examples.
 
 #### Conic Projections
 
@@ -428,7 +428,7 @@ When creating a mutable projection, the *mutate* function is typically not expos
 
 <a name="geoArea" href="#geoArea">#</a> d3.<b>geoArea</b>(<i>object</i>) [<>](https://github.com/d3/d3-geo/blob/master/src/area.js "Source")
 
-Returns the spherical area of the specified GeoJSON *object* in [steradians](http://mathworld.wolfram.com/Steradian.html). This is the spherical equivalent of [*path*.area](#path_area).
+Returns the spherical area of the specified GeoJSON *object* in [steradians](https://en.wikipedia.org/wiki/Steradian). This is the spherical equivalent of [*path*.area](#path_area).
 
 <a name="geoBounds" href="#geoBounds">#</a> d3.<b>geoBounds</b>(<i>object</i>) [<>](https://github.com/d3/d3-geo/blob/master/src/bounds.js "Source")
 

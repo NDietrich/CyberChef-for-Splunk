@@ -23,10 +23,13 @@
 	},
 	"private": true,
 	"dependencies": {
-		"cyberchef": "^9.21.0",
 		"csv-parse": "^4.14.1",
 		"csv-stringify": "~5.4.0",
+		"cyberchef": "file:cyberchef",
+		"grunt": "^1.4.1",
+		"grunt-cli": "^1.4.3",
+		"nearley": "^2.19.9",
 		"stream-transform": "^2.0.3",
-		"nearley": "^2.19.9"
+		"webpack": "^5.51.1"
 	}
 }

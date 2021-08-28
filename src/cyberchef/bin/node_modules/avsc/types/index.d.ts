@@ -22,7 +22,7 @@ declare namespace schema {
   }
 
   interface RecordType {
-    type: "record";
+    type: "record" | "error";
     name: string;
     namespace?: string;
     doc?: string;
@@ -71,7 +71,7 @@ declare namespace schema {
 
 type Schema = Type | schema.AvroSchema;
 
-type Callback<V, Err = any> = (err: Err, value: V) => void;
+type Callback<V, Err = any> = (err: Err | null, value?: V) => void;
 
 
 type Codec = (buffer: Buffer, callback: Callback<Buffer>) => void;
