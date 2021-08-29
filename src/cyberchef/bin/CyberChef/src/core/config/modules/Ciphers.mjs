@@ -34,8 +34,8 @@ import RailFenceCipherDecode from "../../operations/RailFenceCipherDecode.mjs";
 import RailFenceCipherEncode from "../../operations/RailFenceCipherEncode.mjs";
 import TripleDESDecrypt from "../../operations/TripleDESDecrypt.mjs";
 import TripleDESEncrypt from "../../operations/TripleDESEncrypt.mjs";
-import VigenèreDecode from "../../operations/VigenèreDecode.mjs";
-import VigenèreEncode from "../../operations/VigenèreEncode.mjs";
+import VigenereDecode from "../../operations/VigenereDecode.mjs";
+import VigenereEncode from "../../operations/VigenereEncode.mjs";
 
 const OpModules = typeof self === "undefined" ? {} : self.OpModules || {};
 
@@ -69,8 +69,8 @@ OpModules.Ciphers = {
     "Rail Fence Cipher Encode": RailFenceCipherEncode,
     "Triple DES Decrypt": TripleDESDecrypt,
     "Triple DES Encrypt": TripleDESEncrypt,
-    "Vigenère Decode": VigenèreDecode,
-    "Vigenère Encode": VigenèreEncode,
+    "Vigenere Decode": VigenereDecode,
+    "Vigenere Encode": VigenereEncode,
 };
 
 export default OpModules;

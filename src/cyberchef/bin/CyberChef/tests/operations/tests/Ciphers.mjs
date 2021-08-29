@@ -287,89 +287,89 @@ TestRegister.addTests([
         ],
     },
     {
-        name: "Vigenère Encode: no input",
+        name: "Vigenere Encode: no input",
         input: "",
         expectedOutput: "",
         recipeConfig: [
             {
-                "op": "Vigenère Encode",
+                "op": "Vigenere Encode",
                 "args": ["nothing"]
             }
         ],
     },
     {
-        name: "Vigenère Encode: no key",
+        name: "Vigenere Encode: no key",
         input: "LUGGAGEBASEMENTVARENNESALLIESCANBECLOTHEDASENEMIESENEMIESCANBECLOTHEDASALLIESALWAYSUSEID",
         expectedOutput: "No key entered",
         recipeConfig: [
             {
-                "op": "Vigenère Encode",
+                "op": "Vigenere Encode",
                 "args": [""]
             }
         ],
     },
     {
-        name: "Vigenère Encode: invalid key",
+        name: "Vigenere Encode: invalid key",
         input: "LUGGAGEBASEMENTVARENNESALLIESCANBECLOTHEDASENEMIESENEMIESCANBECLOTHEDASALLIESALWAYSUSEID",
         expectedOutput: "The key must consist only of letters",
         recipeConfig: [
             {
-                "op": "Vigenère Encode",
+                "op": "Vigenere Encode",
                 "args": ["abc123"]
             }
         ],
     },
     {
-        name: "Vigenère Encode: normal",
+        name: "Vigenere Encode: normal",
         input: "LUGGAGEBASEMENTVARENNESALLIESCANBECLOTHEDASENEMIESENEMIESCANBECLOTHEDASALLIESALWAYSUSEID",
         expectedOutput: "PXCGRJIEWSVPIQPVRUIQJEJDPOEEJFEQXETOSWDEUDWHJEDLIVANVPMHOCRQFHYLFWLHZAJDPOEEJDPZWYJXWHED",
         recipeConfig: [
             {
-                "op": "Vigenère Encode",
+                "op": "Vigenere Encode",
                 "args": ["Edward"]
             }
         ],
     },
     {
-        name: "Vigenère Decode: no input",
+        name: "Vigenere Decode: no input",
         input: "",
         expectedOutput: "",
         recipeConfig: [
             {
-                "op": "Vigenère Decode",
+                "op": "Vigenere Decode",
                 "args": ["nothing"]
             }
         ],
     },
     {
-        name: "Vigenère Decode: no key",
+        name: "Vigenere Decode: no key",
         input: "PXCGRJIEWSVPIQPVRUIQJEJDPOEEJFEQXETOSWDEUDWHJEDLIVANVPMHOCRQFHYLFWLHZAJDPOEEJDPZWYJXWHED",
         expectedOutput: "No key entered",
         recipeConfig: [
             {
-                "op": "Vigenère Decode",
+                "op": "Vigenere Decode",
                 "args": [""]
             }
         ],
     },
     {
-        name: "Vigenère Decode: invalid key",
+        name: "Vigenere Decode: invalid key",
         input: "PXCGRJIEWSVPIQPVRUIQJEJDPOEEJFEQXETOSWDEUDWHJEDLIVANVPMHOCRQFHYLFWLHZAJDPOEEJDPZWYJXWHED",
         expectedOutput: "The key must consist only of letters",
         recipeConfig: [
             {
-                "op": "Vigenère Decode",
+                "op": "Vigenere Decode",
                 "args": ["abc123"]
             }
         ],
     },
     {
-        name: "Vigenère Decode: normal",
+        name: "Vigenere Decode: normal",
         input: "PXCGRJIEWSVPIQPVRUIQJEJDPOEEJFEQXETOSWDEUDWHJEDLIVANVPMHOCRQFHYLFWLHZAJDPOEEJDPZWYJXWHED",
         expectedOutput: "LUGGAGEBASEMENTVARENNESALLIESCANBECLOTHEDASENEMIESENEMIESCANBECLOTHEDASALLIESALWAYSUSEID",
         recipeConfig: [
             {
-                "op": "Vigenère Decode",
+                "op": "Vigenere Decode",
                 "args": ["Edward"]
             }
         ],

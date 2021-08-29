@@ -355,8 +355,8 @@ import {
     VarIntDecode as core_VarIntDecode,
     VarIntEncode as core_VarIntEncode,
     ViewBitPlane as core_ViewBitPlane,
-    VigenèreDecode as core_VigenèreDecode,
-    VigenèreEncode as core_VigenèreEncode,
+    VigenereDecode as core_VigenereDecode,
+    VigenereEncode as core_VigenereEncode,
     Whirlpool as core_Whirlpool,
     WindowsFiletimeToUNIXTimestamp as core_WindowsFiletimeToUNIXTimestamp,
     XKCDRandomNumber as core_XKCDRandomNumber,
@@ -721,8 +721,8 @@ function generateChef() {
         "varIntDecode": _wrap(core_VarIntDecode),
         "varIntEncode": _wrap(core_VarIntEncode),
         "viewBitPlane": _wrap(core_ViewBitPlane),
-        "vigenèreDecode": _wrap(core_VigenèreDecode),
-        "vigenèreEncode": _wrap(core_VigenèreEncode),
+        "vigenereDecode": _wrap(core_VigenereDecode),
+        "vigenereEncode": _wrap(core_VigenereEncode),
         "whirlpool": _wrap(core_Whirlpool),
         "windowsFiletimeToUNIXTimestamp": _wrap(core_WindowsFiletimeToUNIXTimestamp),
         "XKCDRandomNumber": _wrap(core_XKCDRandomNumber),
@@ -1105,8 +1105,8 @@ const unzip = chef.unzip;
 const varIntDecode = chef.varIntDecode;
 const varIntEncode = chef.varIntEncode;
 const viewBitPlane = chef.viewBitPlane;
-const vigenèreDecode = chef.vigenèreDecode;
-const vigenèreEncode = chef.vigenèreEncode;
+const vigenereDecode = chef.vigenereDecode;
+const vigenereEncode = chef.vigenereEncode;
 const whirlpool = chef.whirlpool;
 const windowsFiletimeToUNIXTimestamp = chef.windowsFiletimeToUNIXTimestamp;
 const XKCDRandomNumber = chef.XKCDRandomNumber;
@@ -1473,8 +1473,8 @@ const operations = [
     varIntDecode,
     varIntEncode,
     viewBitPlane,
-    vigenèreDecode,
-    vigenèreEncode,
+    vigenereDecode,
+    vigenereEncode,
     whirlpool,
     windowsFiletimeToUNIXTimestamp,
     XKCDRandomNumber,
@@ -1845,8 +1845,8 @@ export {
     varIntDecode,
     varIntEncode,
     viewBitPlane,
-    vigenèreDecode,
-    vigenèreEncode,
+    vigenereDecode,
+    vigenereEncode,
     whirlpool,
     windowsFiletimeToUNIXTimestamp,
     XKCDRandomNumber,

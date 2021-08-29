@@ -37,45 +37,61 @@ This App uses four npm packages, which are listed in the **./bin/packages.json**
 ## Building CyberChef
 There is currently a bug with CyberChef [#1166](https://github.com/gchq/CyberChef/issues/1166) and [#1227](https://github.com/gchq/CyberChef/issues/1127) which prevent `npm install` from working.
 
-To download CyberChef and integrate it into this app, the instructions are a bit convoluted. :
-```bash
-// running node v10.19.0
-sudo npm install -g grunt-cli grunt
-
+To download CyberChef and integrate it into this app, the instructions are a bit convoluted.:
+```
 mkdir ~/cyberchef-test
+cd ~/cyberchef-test
+sudo npm install -g grunt-cli grunt
 git clone https://github.com/gchq/CyberChef.git
-mv CyberChef cyberchef
 ```
 
-Now we have to edit `Gruntfile.js` in the cyberchef folder, and comment out everyting for the `fixCryptoApiImports` command. It should look like this:
+Now we have to edit Gruntfile.js in the cyberchef folder, and comment out everyting for the fixCryptoApiImports command. It should look like this:
 ```javascript
-fixCryptoApiImports: {
-	command: [
-		"echo '\n--- SKIPPING BAD CODE ---'"
-	].join(" "),
-	stdout: false
+subl ~/cyberchef-test/CyberChef/Gruntfile.js
+
+	fixCryptoApiImports: {
+		command: [
+		    "echo '\n--- REMOVED ---'"
+		].join(" "),
+		stdout: false
+	    }
 ```
 
-now we need to build cyberchef's node api files and copy them to our CyberCheff Splunk Add-On
+cleanup, remove .git and .gitignre folders
 ```
-# cleanup, remove .git and .gitignre folders
-cd ~/cyberchef-test/cyberchef
+cd ~/cyberchef-test/CyberChef
 rm -rf .git*
 rm package-lock.json
+```
 
-# install grunt-cli locally (not sure why)
-cd ~/cyberchef-test/cyberchef
+install grunt-cli locally (required to build)
+```
+cd ~/cyberchef-test/CyberChef
 npm install grunt-cli grunt
+```
 
-# build node modules
-cd ~/cyberchef-test/cyberchef
+modify source to remove all Vigenère and replace with Vigenere, because when we tar the folder, untar on windows can't handle the unicode.
+```
+cd ~/cyberchef-test/CyberChef
+sed -i -e 's/Vigenère/Vigenere/g' $(find ./ -type f)
+mv ~/cyberchef-test/CyberChef/src/core/operations/VigenèreDecode.mjs ~/cyberchef-test/CyberChef/src/core/operations/VigenereDecode.mjs 
+mv ~/cyberchef-test/CyberChef/src/core/operations/VigenèreEncode.mjs ~/cyberchef-test/CyberChef/src/core/operations/VigenereEncode.mjs 
+```
+
+
+
+install pre-requisites, then build cyberchef node modules
+```
+cd ~/cyberchef-test/CyberChef
+npm install
 grunt node
 ```
-add package.json (for this Add-on, including cyberchef, nearly, csv-parse...)
-```json
-...
-	"dependencies": {
-		"cyberchef": "^9.32.2",
+
+modify  ~/cyberchef-test/package.json to have the following depenencies:
+```javasccript
+	...
+		"dependencies": {
+		"cyberchef": "file:CyberChef",
 		"csv-parse": "^4.14.1",
 		"csv-stringify": "~5.4.0",
 		"stream-transform": "^2.0.3",
@@ -83,23 +99,21 @@ add package.json (for this Add-on, including cyberchef, nearly, csv-parse...)
 	}
 ```
 
-install all required libraries and clean up:
+
+and install all other required node modules:
 ```
 cd ~/cyberchef-test/
-rm ~/cyberchef-test/cyberchef/package-lock.json
-mkdir node_modules
+npm install ./CyberChef
+npm install
 
-npm install grunt-cli grunt webpack
-npm install ./cyberchef
-npm install
-npm dedupe
-npm install
+# cleanup
 npm prune 
+npm dedupe
 ```
 
-finally test your install. Create a test.js file in the ~/cyberchef-test folder, with the follwoing content
+Finally test your install. Create a test.js file in the ~/cyberchef-test folder, with the follwoing content
 ```javascript
-const chef = require("cyberchef");
+const chef = require("./CyberChef/src/node/cjs.js")
 console.log(chef.fromBase64("U28gbG9uZyBhbmQgdGhhbmtzIGZvciBhbGwgdGhlIGZpc2gu"));
 //output will be "So long and thanks for all the fish."
 ```
@@ -108,6 +122,16 @@ and run it:
 ```bash
 node test.js
 ```
+
+Test again with Splunk's node:
+```
+sudo bash
+source /opt/splunk/bin/setSplunkEnv
+/opt/splunk/bin/node test.js
+exit
+```
+
+finaly copy all contents from cyberchef-test folder to app's 'bin' folder
 
 
 

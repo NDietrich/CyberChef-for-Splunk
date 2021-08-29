@@ -350,8 +350,8 @@ module.exports = {
         // testOp(browser, "VarInt Decode", "test input", "test_output");
         // testOp(browser, "VarInt Encode", "test input", "test_output");
         // testOp(browser, "View Bit Plane", "test input", "test_output");
-        // testOp(browser, "Vigenère Decode", "test input", "test_output");
-        // testOp(browser, "Vigenère Encode", "test input", "test_output");
+        // testOp(browser, "Vigenere Decode", "test input", "test_output");
+        // testOp(browser, "Vigenere Encode", "test input", "test_output");
         // testOp(browser, "Whirlpool", "test input", "test_output");
         // testOp(browser, "Windows Filetime to UNIX Timestamp", "test input", "test_output");
         // testOp(browser, "XKCD Random Number", "test input", "test_output");
