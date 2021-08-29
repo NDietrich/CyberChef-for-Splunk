@@ -414,7 +414,7 @@ module.exports = function (grunt) {
             fixCryptoApiImports: {
                 command: [
                     "echo '\n--- REMOVED ---'"
-                                    ].join(" "),
+                ].join(" "),
                 stdout: false
             }
         },

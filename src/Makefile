@@ -25,13 +25,14 @@ define clean_src_folder
 	rm -rf ./build/${APPNAME}/metadata/local.meta || true
 
 # remove any rm -rf commands in package.json and other files (to pass splunk AppInspect). Replace with ls -al
-	find ./build/${APPNAME}/bin/node_modules -iname "package.json" -exec sed -i 's/rm -rf/ls -al/g' {} \;
-	find ./build/${APPNAME}/bin/node_modules -iname "yarn-error.log" -exec sed -i 's/rm -rf/ls -al/g' {} \;
+	find ./build/${APPNAME}/bin/ -iname "package.json" -exec sed -i 's/rm -rf/ls -al/g' {} \;
+	find ./build/${APPNAME}/bin/ -iname "yarn-error.log" -exec sed -i 's/rm -rf/ls -al/g' {} \;
 	find ./build/${APPNAME}/bin/node_modules -iname "Makefile" -exec sed -i 's/rm -rf/ls -al/g' {} \;
 
 # get rid of all readme.md files (not needed); rename tesseract's README.md since it has compilation instructions for the WASM file (required by appinspect)
 	mv ./build/${APPNAME}/bin/node_modules/tesseract.js-core/README.md ./build/${APPNAME}/bin/node_modules/tesseract.js-core/README.md.txt
 	find ./build/${APPNAME}/bin/node_modules -iname "readme.md" -delete
+	find ./build/${APPNAME}/bin/CyberChef/node_modules -iname "readme.md" -delete
 
 # all files should be 644, directories should be 755
 # http://dev.splunk.com/view/app-cert/SP-CAAAE3H
