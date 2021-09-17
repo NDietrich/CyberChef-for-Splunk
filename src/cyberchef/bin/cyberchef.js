@@ -251,7 +251,7 @@ const modify_payload = function(data){
 	var modifiedData = null
 	try {
 		// will convert value to NaN if not passed an integer, or will round doubles down.
-		modifiedData = stringify(newrecords, {header: true })
+		modifiedData = stringify(newrecords, {header: true, quoted_string: true })
 	} catch (err) {
 		halt_on_error("Error converting results to CSV: " + err.message)
 	}
@@ -311,7 +311,7 @@ const halt_on_error = function (msg){
 	msg = msg.replace(/\\/g, "\\\\");
 	msg = msg.replace(/\"/gm," ")
 
-	const metadata = '{"finished":true,"error":"'  + msg +'"}'
+	const metadata = JSON.stringify({"finished":true,"error": msg})
 	const transportHeader = 'chunked 1.0,' + metadata.length + ",0\n"
 	process.stdout.write(transportHeader + metadata)
 
@@ -549,8 +549,8 @@ process.stdin.on('readable', () => {
 
 		log("Size of Payload to Return is\n\tchars:" + modifiedPayload.length + "\n\tbytes: " + bytes)
 		// Return our payload
-		jsonReply = '{"finished":' + parsedMetadata.finished + '}'
-		const transportHeaderReply = 'chunked 1.0,' + jsonReply.length + ',' + modifiedPayload.length
+		jsonReply = JSON.stringify({"finished": parsedMetadata.finished })
+		const transportHeaderReply = 'chunked 1.0,' + jsonReply.length + ',' + bytes
 
 		log("Sending execute SplunkMessage")
 		if((spl_params.debugEnabled != false) && (spl_params.debugEnabled != 'info')) { log( "<<SOF>>" + transportHeaderReply +"\n" + jsonReply + modifiedPayload + "<<EOF>>" ) }
