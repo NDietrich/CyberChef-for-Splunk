@@ -29,24 +29,14 @@ define clean_src_folder
 	find ./build/${APPNAME}/bin/ -iname "yarn-error.log" -exec sed -i 's/rm -rf/ls -al/g' {} \;
 	find ./build/${APPNAME}/bin/node_modules -iname "Makefile" -exec sed -i 's/rm -rf/ls -al/g' {} \;
 
-# get rid of all readme.md files (not needed); rename tesseract's README.md since it has compilation instructions for the WASM file (required by appinspect)
-	mv ./build/${APPNAME}/bin/node_modules/tesseract.js-core/README.md ./build/${APPNAME}/bin/node_modules/tesseract.js-core/README.md.txt
-	find ./build/${APPNAME}/bin/node_modules -iname "readme.md" -delete
-	find ./build/${APPNAME}/bin/CyberChef/node_modules -iname "readme.md" -delete
-
 # all files should be 644, directories should be 755
 # http://dev.splunk.com/view/app-cert/SP-CAAAE3H
 	find ./build/${APPNAME} -type f -exec chmod 644 {} \;
 	find ./build/${APPNAME} -type d -exec chmod 755 {} \;
 
-# get rid of all .pyc files in bin (todo, not working)
-#find ./bin -type f -name '*.pyc' -delete 2>/dev/null
-
 # remove all temp files (ending with tilde)
 	find ./build -type f -name '*~' -exec rm -f '{}' \; 
 	
-# Remove swf file (so the app will pass appinspect)
-	rm ./build/${APPNAME}/bin/node_modules/node-forge/flash/swf/SocketPool.swf 
 endef
 
 # Build SPL file
