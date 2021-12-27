@@ -141,17 +141,35 @@ splunk-appinspect inspect cyberchef.spl --mode test --included-tags cloud
 # Building the CyberChef Web Page
 (must be done on linux, due to line-endings)
 ```
-npm install grunt-cli -g
+sudo npm install grunt grunt-cli -g
 
 git clone https://github.com/gchq/CyberChef.git
 cd CyberChef
-npm install
+```
 
+Fix the crypto imports as above. finally install the required node packages
+```
+npm install
+```
+
+Next, modify the source to remove all Vigenère and replace with Vigenere, because when we tar the folder, untar on windows can't handle the unicode.
+```
+find ./ -type f -exec sed -i -e 's/Vigenère/Vigenere/g' {} \;
+mv ./src/core/operations/VigenèreDecode.mjs ./src/core/operations/VigenereDecode.mjs 
+mv ./src/core/operations/VigenèreEncode.mjs ./src/core/operations/VigenereEncode.mjs 
+```
+
+Finally use grunt to build
+```
 # create html file 
 grunt prod	
 ```
 
-After this completes, the webpage (website actually) is located under **./build/prod/**, and can be launched by opening **./build/prod/index.html**.  Thie prod folder also includes a zip file of the entire website.  You need to add this line at the top of the CyberChef.html file for it to launch within Splunk Web:
+After this completes, the webpage (website actually) is located under **./build/prod/**, and can be launched by opening **./build/prod/index.html**.  Thie prod folder also includes a zip file of the entire website.  
+
+rename index.html as CyberChef.html.
+
+modify CyberChef.html to add the following line at the top of the file for it to launch within Splunk Web:
 ```
 <script src="../../js/i18n.js" />
 ```
