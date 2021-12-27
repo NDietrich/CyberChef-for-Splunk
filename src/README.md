@@ -23,51 +23,78 @@ CyberChef is used two ways in this app:
 2. The local version of the CyberChef web gui.
 
 ## Steps to install the correct node packages
-This App uses four npm packages, which are listed in the **./bin/packages.json** file:
+This App uses five npm packages, which are listed in the **./bin/packages.json** file:
 ```javascript
 	"dependencies": {
-		"cyberchef": "^9.32.2",
 		"csv-parse": "^4.14.1",
 		"csv-stringify": "~5.4.0",
-		"stream-transform": "^2.0.3",
-		"nearley": "^2.19.9"
+		"cyberchef": "^9.23.3",
+		"nearley": "^2.19.9",
+		"stream-transform": "^2.0.3"
 	}
 ```
 
 ## Building CyberChef
-There is currently a bug with CyberChef [#1166](https://github.com/gchq/CyberChef/issues/1166) and [#1227](https://github.com/gchq/CyberChef/issues/1127) which prevent `npm install` from working.
+There is currently a bug with CyberChef [#1166](https://github.com/gchq/CyberChef/issues/1166) and [#1227](https://github.com/gchq/CyberChef/issues/1127) which prevent `npm install` from working.  To install the node libraries, you need to navigate into the 'bin' folder (where the package) and run:
+```
+rm package-lock.json
+npm install --production=true --force
+```
 
-To download CyberChef and integrate it into this app, the instructions are a bit convoluted.:
+then we do a lot of cleanup to reduce the size of the node modules folder:
+```
+npm prune --production
+
+# get rid of readme files with the node-prune project 
+# one exception tesseract's README.md since it has compilation instructions for the WASM file (required by appinspect)
+mv ./node_modules/tesseract.js-core/README.md ./node_modules/tesseract.js-core/README.md.txt
+
+npm install node-prune -g
+node-prune
+
+# Remove swf file (so the app will pass appinspect)
+rm ./node_modules/node-forge/flash/swf/SocketPool.swf 
+
+# remove some oversized files and folders that aren't needed by the node api:
+rm -rf ./node_modules/image-q/demo
+rm ./node_modules/tesseract/lang-data/eng.traineddata.gz
+rm ./node_modules/cyberchef/src/core/vendor/tesseract/lang-data/eng.traineddata.gz
+```
+
+finally run a simple test to make sure cyberchef node api works. create a test.js file in your bin folder, with the following content:
+```
+const chef = require('cyberchef')
+console.log(chef.fromBase64("U28gbG9uZyBhbmQgdGhhbmtzIGZvciBhbGwgdGhlIGZpc2gu"));
+//output will be "So long and thanks for all the fish."
+```
+
+run this with `node test.js` (or explicity use the splunk node engine in the SPLUNK_HOME's bin folder)
+
+
+## Manudally download and install CyberChef 
+This is required to build the web interface (webpage), and is convoluted due to a few bugs and devDependencies.
+
 ```
 mkdir ~/cyberchef-test
 cd ~/cyberchef-test
-sudo npm install -g grunt-cli grunt
 git clone https://github.com/gchq/CyberChef.git
 ```
 
-Now we have to edit Gruntfile.js in the cyberchef folder, and comment out everyting for the fixCryptoApiImports command. It should look like this:
-```javascript
-subl ~/cyberchef-test/CyberChef/Gruntfile.js
-
-	fixCryptoApiImports: {
-		command: [
-		    "echo '\n--- REMOVED ---'"
-		].join(" "),
-		stdout: false
-	    }
+Now we have to edit the Gruntfile.js file due to a bug. We add this code to the last section: **fixCryptoApiImports**: 
+```
+	options: {
+        shell: "/bin/bash"
+    }, 
 ```
 
-cleanup, remove .git and .gitignre folders
+Some housekeeping:
 ```
 cd ~/cyberchef-test/CyberChef
-rm -rf .git*
+rm .*
+rm -rf .git
+rm -rf .github
 rm package-lock.json
-```
-
-install grunt-cli locally (required to build)
-```
-cd ~/cyberchef-test/CyberChef
-npm install grunt-cli grunt
+rm -rf node_modules
 ```
 
 modify source to remove all Vigenère and replace with Vigenere, because when we tar the folder, untar on windows can't handle the unicode.
@@ -80,72 +107,25 @@ mv ~/cyberchef-test/CyberChef/src/core/operations/VigenèreEncode.mjs ~/cyberche
 
 
 
-install pre-requisites, then build cyberchef node modules
+install pre-requisites, then build cyberchef node modules. then cleanup:
 ```
 cd ~/cyberchef-test/CyberChef
-npm install
-grunt node
-```
-
-modify  ~/cyberchef-test/package.json to have the following depenencies:
-```javasccript
-	...
-		"dependencies": {
-		"cyberchef": "file:CyberChef",
-		"csv-parse": "^4.14.1",
-		"csv-stringify": "~5.4.0",
-		"stream-transform": "^2.0.3",
-		"nearley": "^2.19.9"
-	}
+npm install grunt
+npm install --production=false
+npm prune --production 
 ```
 
 
-and install all other required node modules:
-```
-cd ~/cyberchef-test/
-npm install ./CyberChef
-npm install
-
-# cleanup
-npm prune 
-npm dedupe
-```
-
-Finally test your install. Create a test.js file in the ~/cyberchef-test folder, with the follwoing content
-```javascript
-const chef = require("./CyberChef/src/node/cjs.js")
-console.log(chef.fromBase64("U28gbG9uZyBhbmQgdGhhbmtzIGZvciBhbGwgdGhlIGZpc2gu"));
-//output will be "So long and thanks for all the fish."
-```
-
-and run it:
-```bash
-node test.js
-```
-
-Test again with Splunk's node:
-```
-sudo bash
-source /opt/splunk/bin/setSplunkEnv
-/opt/splunk/bin/node test.js
-exit
-```
-
-finaly copy all contents from cyberchef-test folder to app's 'bin' folder
+Finally test your install as above. 
 
 
 
-## the old way of installing (when the bugs above are fixed):
-If you delete **./bin/node_modules** folder, just run **npm install** from the **./bin** folder to install these files. use the Makefile (build spl command) to clean up the build folder before use.
 
 ## testing with Splunk's AppInspect:
 instructions for validating the .spl file on an Ubuntu 20 system:
 
 ```
-sudo apt-get install -y libxml2-dev libxslt-dev lib32z1-dev python-lxml
 sudo apt-get install python3-pip 
-sudo apt install python3-testresources
-sudo pip3 install --upgrade pip setuptools
 
 sudo apt-get install libmagic-dev
 wget https://download.splunk.com/misc/appinspect/splunk-appinspect-latest.tar.gz 
