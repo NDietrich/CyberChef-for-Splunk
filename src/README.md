@@ -189,7 +189,7 @@ you probably also want to modify the 'download' link in this file, as we remove 
 ```
 to:
 ```
-<a href="https://github.com/gchq/CyberChef/" CyberChef Homepage>CyberChef Homepage<i class="material-icons">cloud_download</i></a>
+<a href="https://github.com/gchq/CyberChef/" Homepage target="_blank">CyberChef Homepage <i class="material-icons">link</i></a>
 ```
 
 
