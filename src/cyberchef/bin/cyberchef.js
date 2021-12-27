@@ -335,7 +335,7 @@ const load_modules = function(){
 		// Load explicity, not by package name (otherwise you get intermittent load errors)
 		// super weird, but this seems to work (further testing required)
 		log("\tcyberchef as chef")
-		chef = require("./CyberChef/src/node/cjs.js")
+		chef = require("cyberchef")
 	} catch (err) {
 		halt_on_error("Error loading required module Cyberchef: " + err)
 	}
