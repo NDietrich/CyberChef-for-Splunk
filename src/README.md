@@ -183,6 +183,14 @@ Copy the contents of the **prod** folder (except the zip file) to this app's **.
 </nav>
 ...
 ```
+you probably also want to modify the 'download' link in this file, as we remove the zip file. I point it to the cyberchef homepage and modify the icon (icons here: https://google.github.io/material-design-icons/):
+```
+<a href="CyberChef_v9.32.3.zip" download>Download CyberChef <i class="material-icons">file_download</i></a>
+```
+to:
+```
+<a href="https://github.com/gchq/CyberChef/" CyberChef Homepage>CyberChef Homepage<i class="material-icons">cloud_download</i></a>
+```
 
 
 ## Nearley Grammar
