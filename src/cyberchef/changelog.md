@@ -1,5 +1,13 @@
 # ChangeLog
 
+## v1.0.4
+Released 2021-12-27
+- Reduced package size (of spl file).
+- Changed how CyberChef node api libraries are loaded (correctly this time)
+- removed symlink
+- updated CyberChef to 9.32.3 (CyberChef node api and Web Gui)
+- appinspect validation
+
 ## v1.0.3
 Released 2021-08-29
 - Total re-write of message passing functionality (much simplified, less bugs).
