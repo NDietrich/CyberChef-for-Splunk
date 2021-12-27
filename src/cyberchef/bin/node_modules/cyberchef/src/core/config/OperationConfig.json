@@ -14891,10 +14891,10 @@
             }
         ]
     },
-    "Vigenère Decode": {
+    "Vigenere Decode": {
         "module": "Ciphers",
         "description": "The Vigenere cipher is a method of encrypting alphabetic text by using a series of different Caesar ciphers based on the letters of a keyword. It is a simple form of polyalphabetic substitution.",
-        "infoURL": "https://wikipedia.org/wiki/Vigenère_cipher",
+        "infoURL": "https://wikipedia.org/wiki/Vigenere_cipher",
         "inputType": "string",
         "outputType": "string",
         "flowControl": false,
@@ -14907,10 +14907,10 @@
             }
         ]
     },
-    "Vigenère Encode": {
+    "Vigenere Encode": {
         "module": "Ciphers",
         "description": "The Vigenere cipher is a method of encrypting alphabetic text by using a series of different Caesar ciphers based on the letters of a keyword. It is a simple form of polyalphabetic substitution.",
-        "infoURL": "https://wikipedia.org/wiki/Vigenère_cipher",
+        "infoURL": "https://wikipedia.org/wiki/Vigenere_cipher",
         "inputType": "string",
         "outputType": "string",
         "flowControl": false,

@@ -355,8 +355,8 @@ import Unzip from "./Unzip.mjs";
 import VarIntDecode from "./VarIntDecode.mjs";
 import VarIntEncode from "./VarIntEncode.mjs";
 import ViewBitPlane from "./ViewBitPlane.mjs";
-import VigenèreDecode from "./VigenèreDecode.mjs";
-import VigenèreEncode from "./VigenèreEncode.mjs";
+import VigenereDecode from "./VigenereDecode.mjs";
+import VigenereEncode from "./VigenereEncode.mjs";
 import Whirlpool from "./Whirlpool.mjs";
 import WindowsFiletimeToUNIXTimestamp from "./WindowsFiletimeToUNIXTimestamp.mjs";
 import XKCDRandomNumber from "./XKCDRandomNumber.mjs";
@@ -721,8 +721,8 @@ export {
     VarIntDecode,
     VarIntEncode,
     ViewBitPlane,
-    VigenèreDecode,
-    VigenèreEncode,
+    VigenereDecode,
+    VigenereEncode,
     Whirlpool,
     WindowsFiletimeToUNIXTimestamp,
     XKCDRandomNumber,
