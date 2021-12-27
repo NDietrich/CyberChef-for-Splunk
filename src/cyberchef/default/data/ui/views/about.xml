@@ -1,4 +1,4 @@
-<dashboard>
+<dashboard version="1.1">
   <label>About</label>
   <description>How to Use the CyberChef custom search command.</description>
   <row>
