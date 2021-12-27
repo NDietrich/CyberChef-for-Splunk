@@ -1,6 +1,6 @@
 {
   "name": "cyberchef-for-splunk",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "description": "",
   "keywords": [
     "splunk",
@@ -25,7 +25,7 @@
   "dependencies": {
     "csv-parse": "^4.14.1",
     "csv-stringify": "~5.4.0",
-    "cyberchef": "file:CyberChef",
+    "cyberchef": "^9.23.3",
     "nearley": "^2.19.9",
     "stream-transform": "^2.0.3"
   }
