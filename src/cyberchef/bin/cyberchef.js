@@ -311,8 +311,23 @@ const halt_on_error = function (msg){
 	msg = msg.replace(/\\/g, "\\\\");
 	msg = msg.replace(/\"/gm," ")
 
-	const metadata = '{"finished":true,"error":"'  + msg +'"}'
-	const transportHeader = 'chunked 1.0,' + metadata.length + ",0\n"
+	try {
+		metadata = JSON.stringify({"finished":true,"error": msg})
+	} catch (err) {
+		// if for some reason the stringify function throws an error, let's just  
+		// build the errror string manually so we're sure to send useful info back
+		metadata = '{"finished":true,"error":"'  + msg +'"}'
+	}
+	
+	try {
+		bytes = Buffer.byteLength(metadata, 'utf8')
+	} catch (err) {
+		// fallback, in case of error we can just hope there are no multi-byte unicode chars
+		bytes=metadata.length
+	}
+
+
+	const transportHeader = 'chunked 1.0,' + bytes + ",0\n"
 	process.stdout.write(transportHeader + metadata)
 
 	// sleep until splunk kills us
