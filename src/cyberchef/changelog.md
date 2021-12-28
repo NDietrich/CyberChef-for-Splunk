@@ -1,5 +1,11 @@
 # ChangeLog
 
+## v1.1.0
+Released 2021-12-28
+- Fix for message size when UTF8 chars larger than 1 byte are used in payload.
+- All csv fields are now quoted in reply
+- json stringify used to build error messages
+
 ## v1.0.4
 Released 2021-12-27
 - Reduced package size (of spl file).
