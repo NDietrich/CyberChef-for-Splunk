@@ -1,9 +1,9 @@
 # What is the name of the TA folder?
 APPNAME=cyberchef
 
-# where to instll the SPL file (extracted to your snort app directory)
-# may need to run with elevated priviledges to install to Splunk directory
-APPDIR=/home/noah/Desktop/
+# splunk username and password for install
+USERNAME=admin
+PASS=changeme
 
 # Function Definitions 
 
@@ -28,6 +28,7 @@ define clean_src_folder
 	find ./build/${APPNAME}/bin/ -iname "package.json" -exec sed -i 's/rm -rf/ls -al/g' {} \;
 	find ./build/${APPNAME}/bin/ -iname "yarn-error.log" -exec sed -i 's/rm -rf/ls -al/g' {} \;
 	find ./build/${APPNAME}/bin/node_modules -iname "Makefile" -exec sed -i 's/rm -rf/ls -al/g' {} \;
+	find ./build/${APPNAME}/bin/node_modules -iname "*.ts" -exec sed -i 's/rm -rf/ls -al/g' {} \;
 
 # all files should be 644, directories should be 755
 # http://dev.splunk.com/view/app-cert/SP-CAAAE3H
@@ -56,8 +57,7 @@ spl : clean
 
 .PHONY : install
 install : spl
-	rm -rf ${APPDIR}
-	tar -xzvf ${APPNAME}.spl --directory ${APPDIR}
+	sudo /opt/splunk/bin/splunk install app cyberchef.spl -update 1 -auth admin:changeme
 
 # Create a SPL without deleting the local folder contents (for local testing)
 .PHONY : local-spl
@@ -65,11 +65,6 @@ local-spl : clean
 	$(call clone_src_folder,)
 	$(call clean_src_folder, )
 	$(call build_SPL, )
-
-.PHONY : local-install
-install-testing : local-spl
-	rm -rf ${APPDIR}/${APPNAME}
-	tar -xzvf ${APPNAME}.spl --directory ${APPDIR}
 
 
 .PHONY : clean
