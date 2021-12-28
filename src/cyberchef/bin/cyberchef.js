@@ -251,7 +251,7 @@ const modify_payload = function(data){
 	var modifiedData = null
 	try {
 		// will convert value to NaN if not passed an integer, or will round doubles down.
-		modifiedData = stringify(newrecords, {header: true })
+		modifiedData = stringify(newrecords, {header: true, quoted_string: true })
 	} catch (err) {
 		halt_on_error("Error converting results to CSV: " + err.message)
 	}
