@@ -443,10 +443,16 @@ process.stdin.on('readable', () => {
 
 	// Do we have only a partial message, and we're reading more of it?
 	if(message != null){
-		log("Adding to partial message. Message size is: " + message.length + ", Chunk size is: " + chunk.length +", Total needed message size is: "+ (metadataSize + payloadSize) )
+		log("Appending chunk to partial message. Message size (chars) is: " + message.length + ", Chunk size (chars) is: " + chunk.length + ", Total needed message size (bytes) is: "+ (metadataSize + payloadSize) )
 		message += chunk;
 
-		if(message.length != (metadataSize + payloadSize)){
+		try {
+			bytes = Buffer.byteLength(message, 'utf8')
+		} catch (err) {log(err.message + ", " + err.name)}
+
+		log("message size (bytes) when combining the original partial message and the newly received chunk is " + bytes)
+
+		if(bytes != (metadataSize + payloadSize)){
 			// we don't have a full message yet, read more from stdin
 			// TODO: check for overlength message
 			log("Complete message not yet received." )
@@ -471,12 +477,15 @@ process.stdin.on('readable', () => {
 
 		// remove the header from the data and continue
 		message = chunk.slice(rawHeader.length + 1)
-		log('\t - Actual received message size:   ' + message.length )
+
+		try {
+			bytes = Buffer.byteLength(message, 'utf8')
+		} catch (err) {log(err.message + ", " + err.name)}
+
+		log('\t - Actual received message size is chars: ' + message.length + ', bytes: ' + bytes )
 
 		// do we have a complete message at this point?
-		const recSize = metadataSize + payloadSize
-
-		if (message.length !=  recSize){
+		if (bytes !=  (metadataSize + payloadSize)){
 			log("Incomplete new message recieved, waiting for rest.")
 			return;
 		}
@@ -550,7 +559,7 @@ process.stdin.on('readable', () => {
 		log("Size of Payload to Return is\n\tchars:" + modifiedPayload.length + "\n\tbytes: " + bytes)
 		// Return our payload
 		jsonReply = '{"finished":' + parsedMetadata.finished + '}'
-		const transportHeaderReply = 'chunked 1.0,' + jsonReply.length + ',' + modifiedPayload.length
+		const transportHeaderReply = 'chunked 1.0,' + jsonReply.length + ',' + bytes
 
 		log("Sending execute SplunkMessage")
 		if((spl_params.debugEnabled != false) && (spl_params.debugEnabled != 'info')) { log( "<<SOF>>" + transportHeaderReply +"\n" + jsonReply + modifiedPayload + "<<EOF>>" ) }
