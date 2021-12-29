@@ -1,5 +1,10 @@
 # ChangeLog
 
+## v1.1.1
+Released 2021-12-29
+- log detailed error message when cyberchef node modules fail to load.
+- enable debug logging when cyberchef node modules fail to load.
+
 ## v1.1.0
 Released 2021-12-28
 - Fix for message size when UTF8 chars larger than 1 byte are used in payload.
