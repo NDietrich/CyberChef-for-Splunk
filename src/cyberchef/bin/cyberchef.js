@@ -352,6 +352,11 @@ const load_modules = function(){
 		log("\tcyberchef as chef")
 		chef = require("cyberchef")
 	} catch (err) {
+		// log full error to log file
+		log("Fatal Error loading Cyberchef module: " + err.name + ": " + err.message + "  at " + err.at + ". text: " + err.text)
+		log("Error Stack: \n" + err.stack)
+
+		// Send message back to user
 		halt_on_error("Error loading required module Cyberchef: " + err)
 	}
 
