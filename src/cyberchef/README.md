@@ -126,7 +126,7 @@ This optional parameter specifies which field to write the results of the CyberC
 ```
 
 ## **Debug** parameter
-This optional parameter can either be set to **full** for full debug information (including the contennt of messages passed between splunk and this app, including the data from your events), or to **info** for the same information, excluding the actual data sent and received.  The debug information is saved to a file named **cyberchef.log** in the search's dispatch directory.  If you have a problem and are requesting assitance, you'll probably want to include the debug log.
+This optional parameter can either be set to **full** for full debug information (including the contennt of messages passed between splunk and this app, including the data from your events), or to **info** for the same information, excluding the actual data sent and received.  The debug information is saved to a file named **debug.log** in the search's dispatch directory.  If you have a problem and are requesting assitance, you'll probably want to include the debug log.
 ```
 ... | cyberchef infield='inData' debug=full operation="ToBase64" |...
 ... | cyberchef infield='inData' debug=info outfield='modifiedData' operation="ToBase64" |...

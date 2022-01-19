@@ -117,7 +117,7 @@ const getinfo_reply = function(){
 		parser.feed(params);
 	} catch (err){
 		log("Fatal Error trying to parse input options with nearley parser. The parser output is: \n" + err.message.split("\n",5 ).join("\n") + "\n" )
-		halt_on_error("Error trying to parse input options. Please see cyberchef.log in this search's dispatch_dir for details. Error: " +  err.message.split("\n",1) )
+		halt_on_error("Error trying to parse input options. Please see debug.log in this search's dispatch_dir for details. Error: " +  err.message.split("\n",1) )
 	}
 	
 	var kvPairs = parser.results[0]
