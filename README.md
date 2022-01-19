@@ -10,7 +10,6 @@ In most instances you will want to install this App on your Splunk servers direc
 # Example:
 ```
 | makeresults count=3 
- | streamstats count
  | eval data=random()/random() 
  | cyberchef infield='data' outfield='convertedData' operation="ToBase64" 
  | table data convertedData

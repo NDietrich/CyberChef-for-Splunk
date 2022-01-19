@@ -3,8 +3,7 @@ This Splunk App provides a Custom Search Command named **cyberchef** that allows
 
 ## Quick Example:
 ```
-| makeresults count=3 
- | streamstats count
+| makeresults count=3
  | eval data=random()/random() 
  | cyberchef infield='data' outfield='convertedData' operation="ToBase64" 
  | table data convertedData

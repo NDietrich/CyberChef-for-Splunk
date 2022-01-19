@@ -7,8 +7,7 @@
         <h1 id="cyberchef-for-splunk">CyberChef for Splunk</h1>
 <p>This Splunk App provides a Custom Search Command named <strong>cyberchef</strong> that allows you to apply <a href="https://github.com/gchq/CyberChef">CyberChef</a> operations and recipes to your events. This App also provides a local version of the CyberChef web GUI.</p>
 <h2 id="quick-example">Quick Example:</h2>
-<pre><code>| makeresults count=3 
- | streamstats count
+<pre><code>| makeresults count=3
  | eval data=random()/random() 
  | cyberchef infield=&#39;data&#39; outfield=&#39;convertedData&#39; operation=&quot;ToBase64&quot; 
  | table data convertedData</code></pre>
