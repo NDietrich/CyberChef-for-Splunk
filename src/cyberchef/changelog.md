@@ -1,5 +1,10 @@
 # ChangeLog
 
+## v1.1.2
+Released 2021-01-19
+- Bugfix for "SyntaxError: Unexpected token import" when loading CyberChef libraries.
+- Simplified SPL example code.
+
 ## v1.1.1
 Released 2021-12-29
 - log detailed error message when cyberchef node modules fail to load.
