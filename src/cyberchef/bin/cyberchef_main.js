@@ -565,7 +565,7 @@ process.stdin.on('readable', () => {
 		// cyberchef is sloooooo to load, so doing this when splunk is working on building the info 
 		// to send us may save a bit of time.  
 		// only load modules if we have a valid SID (otherwise it's not needed and will get cancelled by splunk)
-		if (searchOptions.searchinfo.sid.match(/^\d{10}\.\d+$/)){
+		if ((searchOptions.searchinfo.sid.match(/^\d{10}\.\d+$/)) || (searchOptions.searchinfo.sid.match(/^(\d{10}\.|scheduler)/))){
 			load_modules()
 		}
 		return;
